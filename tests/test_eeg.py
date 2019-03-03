@@ -17,7 +17,12 @@ def test_eeg_length():
     -------
     Assertion with respect to the total number of subjects
     """
-    fname = os.path.join(base_dir, 'data/processed/eeg_raw.h5')
+    # Raw data
+    fname = os.path.join(base_dir, 'data/interim/raw_eeg.h5')
     data = dd.io.load(fname)
+    assert (len(data.keys())==len(subjects))
 
+    # Clean data
+    fname = os.path.join(base_dir, 'data/processed/clean_eeg.h5')
+    data = dd.io.load(fname)
     assert (len(data.keys())==len(subjects))
