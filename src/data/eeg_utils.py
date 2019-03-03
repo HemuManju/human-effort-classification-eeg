@@ -19,8 +19,7 @@ epoch_length = config['epoch_length']
 
 
 def get_eeg_path(subject, raw=True):
-    """
-    Get the EEG file path and Force data path of a subject
+    """Get the EEG file path and Force data path of a subject.
 
     Parameter
     ----------
@@ -30,6 +29,7 @@ def get_eeg_path(subject, raw=True):
     Returns
     ----------
     eeg_file_path   : path to a EEG data to the subject
+
     """
     # EEG file
     eeg_path = '../data/raw/eeg_data/' + subject + '/'
@@ -44,8 +44,7 @@ def get_eeg_path(subject, raw=True):
 
 
 def get_trial_path(subject, trial):
-    """
-    Get the trial file path  a subject
+    """Get the trial file path  a subject.
 
     Parameter
     ----------
@@ -55,6 +54,7 @@ def get_trial_path(subject, trial):
     Returns
     ----------
     trial_file_path   : path to a trial (Force) data to the subject
+
     """
     # Trial time
     trial_path = '../data/raw/force_data/' + subject + '/'
@@ -67,8 +67,7 @@ def get_trial_path(subject, trial):
 
 
 def get_eeg_time(subject):
-    """
-    Get the start time of eeg trial
+    """Get the start time of eeg trial
 
     Parameter
     ----------
@@ -89,8 +88,7 @@ def get_eeg_time(subject):
 
 
 def get_trial_time(subject, trial):
-    """
-    Get the start and end time of a trial to align with eeg data
+    """Get the start and end time of a trial to align with eeg data.
 
     Parameter
     ----------
@@ -100,6 +98,7 @@ def get_trial_time(subject, trial):
     ----------
     trial_start : start time of the trial with eeg as reference
     trial_end   : end time of the trial with eeg as reference
+    
     """
     # EEG time
     eeg_time = get_eeg_time(subject)
@@ -124,8 +123,7 @@ def get_trial_time(subject, trial):
 
 
 def get_eeg_data(subject):
-    """
-    Get the eeg data excluding unnessary channels from edf file
+    """Get the eeg data excluding unnessary channels from edf file.
 
     Parameter
     ----------
@@ -134,6 +132,7 @@ def get_eeg_data(subject):
     Returns
     ----------
     raw_selected : selected raw eeg out of whole experiment
+
     """
     eeg_path = get_eeg_path(subject)
     eeg_time = get_eeg_time(subject)
@@ -162,8 +161,7 @@ def get_eeg_data(subject):
 
 
 def create_epochs(subject, trial, preload=True):
-    """
-    Get the epcohed eeg data excluding unnessary channels from fif file and also filter the signal
+    """Get the epcohed eeg data excluding unnessary channels from fif file and also filter the signal.
 
     Parameter
     ----------
@@ -173,6 +171,7 @@ def create_epochs(subject, trial, preload=True):
     Returns
     ----------
     epochs  : epoched data
+
     """
     trial_start, trial_end = get_trial_time(subject, trial)
     raw = get_eeg_data(subject)

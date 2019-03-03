@@ -5,13 +5,11 @@ import yaml
 
 
 def autoreject_repair_epochs(epochs, reject_plot=False):
-    """
-    Rejects the bad epochs with AutoReject algorithm
+    """Rejects the bad epochs with AutoReject algorithm
 
     Parameter
     ----------
     epochs : Epoched, filtered eeg data
-
     Returns
     ----------
     epochs : Epoched data after rejection of bad epochs
@@ -33,14 +31,12 @@ def autoreject_repair_epochs(epochs, reject_plot=False):
 
 
 def append_eog_index(epochs, ica):
-    """
-    Detects the eye blink aritifact indices and adds that information to ICA
+    """Detects the eye blink aritifact indices and adds that information to ICA
 
     Parameter
     ----------
     epochs : Epoched, filtered, and autorejected eeg data
     ica    : ica object from mne
-
     Returns
     ----------
     ICA : ICA object with eog indices appended
@@ -66,13 +62,11 @@ def append_eog_index(epochs, ica):
 
 
 def clean_with_ica(epochs, show_ica=False):
-    """
-    Runs ICA on the given epochs
+    """Clean epochs with ICA.
 
     Parameter
     ----------
     epochs : Epoched, filtered, and autorejected eeg data
-
     Returns
     ----------
     ica     : ICA object from mne
@@ -98,17 +92,16 @@ def clean_with_ica(epochs, show_ica=False):
 
 
 def clean_dataset(subject, trial):
-    """
-    Create cleaned dataset (by running autoreject and ICA) with each subject data in a dictionary
-
+    """Create cleaned dataset (by running autoreject and ICA) with each subject data in a dictionary.
+    
     Parameter
     ----------
     subject : string of subject ID e.g. 7707
     trial   : HighFine, HighGross, LowFine, LowGross
-
     Returns
     ----------
     clean_eeg_dataset : dataset of all the subjects with different conditions
+
     """
 
     clean_eeg_dataset = {}

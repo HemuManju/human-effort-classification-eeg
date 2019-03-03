@@ -8,7 +8,7 @@ config = yaml.load(open(base_dir + '/src/config.yml'))
 subjects = config['subjects']
 trials = config['trials']
 
-# @pytest.mark.skip(reason='slow')
+@pytest.mark.skip(reason='slow')
 def test_eeg_length():
     """Short summary.
     Test the number of subjects in data

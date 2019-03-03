@@ -3,8 +3,8 @@ import deepdish as dd
 import yaml
 
 def create_dataset(subjects, trials):
-    """
-    create the data with each subject data in a dictionary
+    """Create the data with each subject data in a dictionary.
+
     Parameter
     ----------
     subject : string of subject ID e.g. 7707
@@ -13,6 +13,7 @@ def create_dataset(subjects, trials):
     Returns
     ----------
     eeg_dataset : dataset of all the subjects with different conditions
+    
     """
     eeg_dataset = {}
     for subject in subjects:
