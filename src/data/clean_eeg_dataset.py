@@ -82,18 +82,19 @@ def clean_with_ica(epochs, show_ica=False):
     reject_threshold = get_rejection_threshold(epochs)
     ica.fit(epochs, picks=picks, reject=reject_threshold)
 
-    ica = append_eog_index(epochs, ica) # Append the eog index to ICA
-    ica.detect_artifacts(epochs, eog_criterion=range(2)); # mne pipeline to detect artifacts
+    ica = append_eog_index(epochs, ica)  # Append the eog index to ICA
+    # mne pipeline to detect artifacts
+    ica.detect_artifacts(epochs, eog_criterion=range(2))
     if show_ica:
         ica.plot_components(inst=epochs)
-    ica.apply(epochs); # Apply the ICA
+    ica.apply(epochs)  # Apply the ICA
 
     return epochs, ica
 
 
 def clean_dataset(subject, trial):
     """Create cleaned dataset (by running autoreject and ICA) with each subject data in a dictionary.
-    
+
     Parameter
     ----------
     subject : string of subject ID e.g. 7707
@@ -105,13 +106,13 @@ def clean_dataset(subject, trial):
     """
 
     clean_eeg_dataset = {}
-    raw_eeg = dd.io.load('../data/interim/raw_eeg.h5') # load the raw eeg
+    raw_eeg = dd.io.load('../data/interim/raw_eeg.h5')  # load the raw eeg
 
     for subject in subjects:
-        data = {'eeg':{'HighFine': None, 'HighGross': None,
-        'LowFine': None,'LowGross': None},
-        'ica':{'HighFine': None, 'HighGross': None,
-        'LowFine': None,'LowGross': None}}
+        data = {'eeg': {'HighFine': None, 'HighGross': None,
+                        'LowFine': None, 'LowGross': None},
+                'ica': {'HighFine': None, 'HighGross': None,
+                        'LowFine': None, 'LowGross': None}}
         for trial in trials:
             epochs = raw_eeg[subject]['eeg'][trial]
             ica_epochs, ica = clean_with_ica(epochs)
@@ -123,12 +124,15 @@ def clean_dataset(subject, trial):
     return clean_eeg_dataset
 
 
-if __name__=='__main__':
-    config = yaml.load(open('./config.yml'))
+if __name__ == '__main__':
+    path = Path(__file__).parents[1] / 'config.yml'
+    config = yaml.load(open(path))
     subjects = config['subjects']
     trials = config['trials']
     # Main file
     clean_dataset = clean_dataset(subjects, trials)
-    save=True # Save the file
+    save = True  # Save the file
     if save:
-        dd.io.save('../data/processed/clean_eeg.h5', clean_dataset)
+        save_path = Path(__file__).parents[2] / \
+            'data/processed/clean_eeg_dataset.h5'
+        dd.io.save(save_path, clean_dataset)

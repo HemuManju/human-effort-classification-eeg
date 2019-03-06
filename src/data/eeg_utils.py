@@ -1,6 +1,6 @@
 import mne
 import numpy as np
-import os
+from pathlib import Path
 import seaborn as sb
 import pandas as pd
 from mne.parallel import parallel_func
@@ -14,7 +14,7 @@ from autoreject import get_rejection_threshold
 import yaml
 
 # Import configuration
-config = yaml.load(open('./config.yml'))
+config = yaml.load(open(str(Path(__file__).parents[1]) + '/config.yml'))
 epoch_length = config['epoch_length']
 
 
@@ -32,13 +32,13 @@ def get_eeg_path(subject, raw=True):
 
     """
     # EEG file
-    eeg_path = '../data/raw/eeg_data/' + subject + '/'
-    fname = [f for f in os.listdir(eeg_path) if f.endswith('.edf')]
+    path = Path(__file__).parents[2] / 'data/raw/eeg_data/' / subject
+    fname = [str(f) for f in path.iterdir() if f.suffix == '.edf']
     fname.sort()
     if raw:
-        eeg_path = eeg_path + fname[1]  # raw file
+        eeg_path = fname[1]  # raw file
     else:
-        eeg_path = eeg_path + fname[0]  # Decontaminated file
+        eeg_path = fname[0]  # decontaminated file
 
     return eeg_path
 
@@ -53,15 +53,15 @@ def get_trial_path(subject, trial):
 
     Returns
     ----------
-    trial_file_path   : path to a trial (Force) data to the subject
+    trial_path   : path to a trial (Force) data to the subject
 
     """
     # Trial time
-    trial_path = '../data/raw/force_data/' + subject + '/'
-    fname = [f for f in os.listdir(trial_path) if f.endswith('.csv')]
+    path = Path(__file__).parents[2] / 'data/raw/force_data/' / subject
+    fname = [str(f) for f in path.iterdir() if f.suffix == '.csv']
     fname.sort()
     idx = ['HighFine', 'HighGross', 'LowFine', 'LowGross'].index(trial)
-    trial_path = trial_path + fname[idx]
+    trial_path = fname[idx]
 
     return trial_path
 
@@ -82,7 +82,7 @@ def get_eeg_time(subject):
     eeg_path = get_eeg_path(subject)
     eeg_time = eeg_path.split('.')
     eeg_time = datetime.strptime(
-        ''.join(eeg_time[3:5]) + '0000', '%d%m%y%H%M%S%f')
+        ''.join(eeg_time[1:3]) + '0000', '%d%m%y%H%M%S%f')
 
     return eeg_time
 
@@ -98,7 +98,7 @@ def get_trial_time(subject, trial):
     ----------
     trial_start : start time of the trial with eeg as reference
     trial_end   : end time of the trial with eeg as reference
-    
+
     """
     # EEG time
     eeg_time = get_eeg_time(subject)
@@ -152,15 +152,15 @@ def get_eeg_data(subject):
     raw_selected = mne.io.RawArray(data, info, verbose=False)
 
     # Additional information
-    meas_date = eeg_time.strftime('%m-%d-%Y,%H:%M:%S')
-    raw_selected.info['description'] = meas_date
+    meas_date = 'measure_time:' + eeg_time.strftime('%m-%d-%Y,%H:%M:%S')
+    raw_selected.info['description'] = me
     raw_selected.info['subject_info'] = subject
     raw_selected.info['experimenter'] = 'hemanth'
 
     return raw_selected
 
 
-def create_epochs(subject, trial, preload=True):
+def create_eeg_epochs(subject, trial, preload=True):
     """Get the epcohed eeg data excluding unnessary channels from fif file and also filter the signal.
 
     Parameter
@@ -174,6 +174,7 @@ def create_epochs(subject, trial, preload=True):
 
     """
     trial_start, trial_end = get_trial_time(subject, trial)
+    print(trial_start, trial_end)
     raw = get_eeg_data(subject)
     raw_cropped = raw.copy().crop(tmin=trial_start, tmax=trial_end)  # Crop the trials
     raw_cropped.notch_filter(60, filter_length='auto',

@@ -1,5 +1,6 @@
-from eeg_utils import *
+from robot_utils import *
 import deepdish as dd
+from pathlib import Path
 import yaml
 
 
@@ -13,18 +14,18 @@ def create_dataset(subjects, trials):
 
     Returns
     ----------
-    eeg_dataset : dataset of all the subjects with different conditions
+    robot_dataset : dataset of all the subjects with different conditions.
 
     """
-    eeg_dataset = {}
+    robot_dataset = {}
     for subject in subjects:
-        data = {'eeg': {'HighFine': None, 'HighGross': None,
-                        'LowFine': None, 'LowGross': None}}
+        data = {'robot': {'HighFine': None, 'HighGross': None,
+                          'LowFine': None, 'LowGross': None}}
         for trial in trials:
-            data['eeg'][trial] = create_eeg_epochs(subject, trial)
-        eeg_dataset[subject] = data
+            data['robot'][trial] = create_robot_epochs(subject, trial)
+        robot_dataset[subject] = data
 
-    return eeg_dataset
+    return robot_dataset
 
 
 if __name__ == '__main__':
@@ -32,10 +33,11 @@ if __name__ == '__main__':
     config = yaml.load(open(path))
     subjects = config['subjects']
     trials = config['trials']
+
     # Main file
-    eeg_dataset = create_dataset(subjects, trials)
-    save = False  # Save the file
+    robot_dataset = create_dataset(subjects, trials)
+    save = True  # Save the file
     if save:
         save_path = Path(__file__).parents[2] / \
-            'data/processed/raw_eeg_dataset.h5'
-        dd.io.save(save_path, eeg_dataset)
+            'data/processed/robot_dataset.h5'
+        dd.io.save(save_path, robot_dataset)
