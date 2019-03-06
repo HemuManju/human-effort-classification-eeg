@@ -1,21 +1,27 @@
 import torch
 import numpy as np
 from torch.utils.data import DataLoader, Dataset
-import torch.nn as nn
-
 
 class ShallowEEGNet(nn.Module):
-    """Convolution neural network class for eeg classification
+    """Convolution neural network class for eeg classification.
+
+    Parameters
+    ----------
+    OUTPUT : int
+        Number of classes.
 
     Attributes
     ----------
-    net_1 : pytorch Sequential with convolution operation
-    pool : pooling layer
-    net_2 : classification convolution layer
+    net_1 : pytorch Sequential
+        Convolution neural network class for eeg classification.
+    pool : pytorch pooling
+        Pooling layer.
+    net_2 : pytorch Sequential
+        Classification convolution layer.
 
     """
     def __init__(self, OUTPUT):
-        super(ConvNet, self).__init__()
+        super(ShallowEEGNet, self).__init__()
         self.net_1 = nn.Sequential(
             nn.Conv2d(1, 20, kernel_size=(1, 15), stride=1, bias=False),
             nn.Conv2d(20, 20, kernel_size=(10, 10), stride=1, bias=False),

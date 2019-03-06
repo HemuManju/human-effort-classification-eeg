@@ -37,5 +37,5 @@ if __name__ == '__main__':
     save = False  # Save the file
     if save:
         save_path = Path(__file__).parents[2] / \
-            'data/processed/raw_eeg_dataset.h5'
+            'data/interim/raw_eeg_dataset.h5'
         dd.io.save(save_path, eeg_dataset)

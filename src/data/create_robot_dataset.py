@@ -39,5 +39,5 @@ if __name__ == '__main__':
     save = True  # Save the file
     if save:
         save_path = Path(__file__).parents[2] / \
-            'data/processed/robot_dataset.h5'
+            'data/interim/robot_dataset.h5'
         dd.io.save(save_path, robot_dataset)
