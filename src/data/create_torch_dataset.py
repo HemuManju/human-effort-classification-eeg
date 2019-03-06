@@ -5,6 +5,7 @@ from pathlib import Path
 import deepdish as dd
 import numpy as np
 
+
 def one_hot_encode(label_length, category):
     """Generate one hot encoded value of required length and category.
 
@@ -27,8 +28,8 @@ def one_hot_encode(label_length, category):
     return y
 
 
-def convert_to_tensors(subject, trial):
-    """Converts the edf files in eeg and robot dataset into tensors.
+def convert_to_array(subject, trial):
+    """Converts the edf files in eeg and robot dataset into arrays.
 
     Parameters
     ----------
@@ -40,22 +41,24 @@ def convert_to_tensors(subject, trial):
     Returns
     -------
     tensors
-        x and y tensors corresponding to the subject and trial.
+        x and y arrays corresponding to the subject and trial.
 
     """
-    eeg_path = str(Path(__file__).parents[2] /'data/interim/clean_eeg_dataset.h5')
-    data = dd.io.load(eeg_path, group='/'+subject)
+    eeg_path = str(
+        Path(__file__).parents[2] / 'data/interim/clean_eeg_dataset.h5')
+    data = dd.io.load(eeg_path, group='/' + subject)
     x = data['eeg'][trial].get_data()
-    if trial=='HighFine': category = [1, 0, 0]
-    if trial=='LowGross': category = [0, 1, 0]
-    if (trial=='HighGross') or (trial=='LowFine'): category = [0, 0, 1]
-    print(category, trial=='HighFine')
-    y = one_hot_encode(x.shape[0], category)
+    if trial == 'HighFine':
+        category = [1, 0, 0]
+    if trial == 'LowGross':
+        category = [0, 1, 0]
+    if (trial == 'HighGross') or (trial == 'LowFine'):
+        category = [0, 0, 1]
 
-    x_tensor = torch.from_numpy(x[:,0:n_electrodes,0:epoch_length*s_freq])
-    y_tensor = torch.from_numpy(y)
+    x_array = x[:, 0:n_electrodes, 0:epoch_length * s_freq]
+    y_array = one_hot_encode(x.shape[0], category)
 
-    return x_tensor.type(torch.float32), y_tensor.type(torch.float32)
+    return x_array, y_array
 
 
 def create_torch_dataset(subjects, trials):
@@ -74,18 +77,19 @@ def create_torch_dataset(subjects, trials):
         All the data from subjects with labels.
 
     """
-    # Initialize the tensors
+    # Initialize the numpy array
     torch_dataset = {}
-    x_temp = torch.empty((0, n_electrodes, epoch_length*s_freq))
-    y_temp = torch.empty((0, n_class))
+    x_temp = np.empty((0, n_electrodes, epoch_length * s_freq))
+    y_temp = np.empty((0, n_class))
 
     for subject in subjects:
         for trial in trials:
-            x_tensor, y_tensor = convert_to_tensors(subject, trial)
-            x_temp = torch.cat((x_temp, x_tensor), dim=0)
-            y_temp = torch.cat((y_temp, y_tensor), dim=0)
+            x_array, y_array = convert_to_array(subject, trial)
+            x_temp = np.concatenate((x_temp, x_array), axis=0)
+            y_temp = np.concatenate((y_temp, y_array), axis=0)
     torch_dataset['features'] = x_temp
     torch_dataset['labels'] = y_temp
+    torch_dataset['data_index'] = np.arange(y_temp.shape[0])
 
     return torch_dataset
 
@@ -104,6 +108,6 @@ if __name__ == '__main__':
     torch_dataset = create_torch_dataset(subjects, trials)
     save = True  # Save the file
     if save:
-        save_path = str(Path(__file__).parents[2] / \
-            'data/processed/torch_dataset.h5')
+        save_path = str(Path(__file__).parents[2]
+                        / 'data/processed/torch_dataset.h5')
         dd.io.save(save_path, torch_dataset)
