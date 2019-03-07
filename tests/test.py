@@ -71,7 +71,7 @@ def test_data_iterator_ids():
     Assertion whether length of test id is equal to length of validate id
 
     """
-    path = Path(__file__).parents[1] / 'data/processed/torch_dataset.h5'
+    path = str(Path(__file__).parents[1] / 'data/processed/torch_dataset.h5')
     ids_list = data_iterator_ids(path, test_size=0.15)
 
     # Check validation and testing data size

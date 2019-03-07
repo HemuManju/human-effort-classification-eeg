@@ -1,15 +1,32 @@
 from visdom import Visdom
-from utils import classification_accuracy, weights_init, data_iterator_ids
+from utils import weights_init, data_iterator_ids
 import yaml
 import torch
 from networks import ShallowEEGNet
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 import torch.nn as nn
 from pathlib import Path
 from datasets import CustomDataset
 
 
 def create_data_iterator(data_path, BATCH_SIZE, TEST_SIZE):
+    """Create data iterators.
+
+    Parameters
+    ----------
+    data_path : str
+        Path to the dataset.
+    BATCH_SIZE : int
+        Batch size of the data.
+    TEST_SIZE : float
+        Test size e.g 0.3 is 30% of the test data.
+
+    Returns
+    -------
+    dict
+        A dictionary contaning traning, validation, and testing iterator.
+
+    """
 
     ids_list = data_iterator_ids(data_path, test_size=TEST_SIZE)
 
@@ -93,11 +110,11 @@ if __name__ == '__main__':
     data_path = Path(__file__).parents[2] / 'data/processed/torch_dataset.h5'
 
     # Network parameters
-    parameters = {'OUTPUT': 3,
-                  'NUM_EPOCHS': 1,
-                  'BATCH_SIZE': 64,
-                  'LEARNING_RATE': 0.001,
-                  'TEST_SIZE': 0.15,
+    parameters = {'OUTPUT': config['OUTPUT'],
+                  'NUM_EPOCHS': config['NUM_EPOCHS'],
+                  'BATCH_SIZE': config['BATCH_SIZE'],
+                  'LEARNING_RATE': config['LEARNING_RATE'],
+                  'TEST_SIZE': config['TEST_SIZE'],
                   'data_path': str(data_path)}
 
     trained_model = train(ShallowEEGNet, parameters)

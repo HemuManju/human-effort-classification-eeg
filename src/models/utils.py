@@ -2,6 +2,7 @@ from torch.nn.init import xavier_normal_
 import deepdish as dd
 from sklearn.model_selection import train_test_split
 import numpy as np
+import torch
 
 
 def weights_init(model):
@@ -35,6 +36,7 @@ def classification_accuracy(model, data_iterator):
         accuracy of classification.
 
     """
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     with torch.no_grad():
         total = 0
         length = 0

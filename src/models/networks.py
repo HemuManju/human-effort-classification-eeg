@@ -26,12 +26,13 @@ class ShallowEEGNet(nn.Module):
 
     def __init__(self, OUTPUT):
         super(ShallowEEGNet, self).__init__()
+        # Configuration of EEG signals
         path = Path(__file__).parents[1] / 'config.yml'
         config = yaml.load(open(path))
-        # Configuration of EEG signals
         self.epoch_length = config['epoch_length']
         self.s_freq = config['s_freq']
         self.n_electrodes = config['n_electrodes']
+
         self.net_1 = nn.Sequential(
             nn.Conv2d(1, 20, kernel_size=(1, 15), stride=1, bias=False),
             nn.Conv2d(20, 20, kernel_size=(10, 10), stride=1, bias=False),
