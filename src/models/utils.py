@@ -3,7 +3,8 @@ import deepdish as dd
 from sklearn.model_selection import train_test_split
 import numpy as np
 import torch
-import datetime
+import time
+from torchnet.logger import VisdomPlotLogger
 
 
 def weights_init(model):
@@ -22,6 +23,30 @@ def weights_init(model):
 
 
 def classification_accuracy(model, data_iterator):
+    """Calculate the classification accuracy of all data_iterators.
+
+    Parameters
+    ----------
+    model : pytorch object
+        A pytorch model.
+    data_iterator : dict
+        A dictionary with different datasets.
+
+    Returns
+    -------
+    list
+        A dictionary of accuracy for all datasets.
+
+    """
+    accuracy = []
+    keys = data_iterator.keys()
+    for key in keys:
+        accuracy.append(calculate_accuracy(model, data_iterator, key))
+
+    return accuracy
+
+
+def calculate_accuracy(model, data_iterator, key):
     """Calculate the classification accuracy.
 
     Parameters
@@ -30,25 +55,27 @@ def classification_accuracy(model, data_iterator):
         A pytorch model.
     data_iterator : pytorch object
         A pytorch dataset.
+    key : str
+        A key to select which dataset to evaluate
 
     Returns
     -------
     float
-        accuracy of classification.
+        accuracy of classification for the given key.
 
     """
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     with torch.no_grad():
         total = 0
         length = 0
-        for x, y in data_iterator:
+        for x, y in data_iterator[key]:
             out_put = model(x.to(device))
             out_put = out_put.cpu().detach()
             total += (out_put.argmax(dim=1) == y.argmax(dim=1)).float().sum()
             length += len(y)
         accuracy = total / length
 
-    return accuracy
+    return accuracy.numpy()
 
 
 def data_iterator_ids(path, test_size=0.15):
@@ -81,13 +108,49 @@ def data_iterator_ids(path, test_size=0.15):
     return ids_list
 
 
-def create_model_info(model):
+def visual_log(title):
+    """Return a pytorch tnt visual loggger.
 
-    model_info = {'epoch': epoch,
-                  'model': model,
-                  'time': datetime.datetime.now(),
-                  'training_accuracy': accuracy['training'],
-                  'validation_accuracy': accuracy['validation']
-                  'loss': loss}
+    Parameters
+    ----------
+    title : str
+        A title to describe the logging.
+
+    Returns
+    -------
+    type
+        pytorch visual logger.
+
+    """
+    visual_logger = VisdomPlotLogger('line',
+                                     opts=dict(legend=['Training', 'Validation', 'Testing'],
+                                               xlabel='Epochs', ylabel='Accuracy', title=title))
+
+    return visual_logger
+
+
+def create_model_info(model, param, accuracy):
+    """Create a dictionary of relevant model info.
+
+    Parameters
+    ----------
+    model : pytorch object
+        A trained model from pytorch.
+    param : dict
+        Any parameter relevant for logging.
+    accuracy_log : dict
+        A dictionary containing accuracies.
+
+    Returns
+    -------
+    type
+        Description of returned object.
+
+    """
+    model_info = {'model': model,
+                  'model_parameters': param,
+                  'training_accuracy': accuracy[:, 0],
+                  'validation_accuracy': accuracy[:, 1],
+                  'testing_accuracy': accuracy[:, 2]}
 
     return model_info

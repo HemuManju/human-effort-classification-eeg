@@ -26,13 +26,13 @@ def create_data_iterator(data_path, BATCH_SIZE, TEST_SIZE):
         A dataset iterator.
 
     """
-    print(BATCH_SIZE)
     ids_list = dd.io.load(data_path, group='/data_index')
     # Create datasets
-    train_data = CustomDataset(ids_list)
+    test_data = CustomDataset(ids_list)
+    data_iterator = {}
     # Load datasets
-    data_iterator = DataLoader(train_data, batch_size=BATCH_SIZE,
-                               shuffle=True, num_workers=6)
+    data_iterator = DataLoader(test_data, batch_size=BATCH_SIZE,
+                                          shuffle=True, num_workers=6)
 
     return data_iterator
 
@@ -55,20 +55,26 @@ def predict(model_path, parameters):
     """
     data_iterator = create_data_iterator(parameters['data_path'],
                                          parameters['BATCH_SIZE'], parameters['TEST_SIZE'])
-    trained_model = torch.load(model_path)
-    trained_model.eval()
-    accuracy = classification_accuracy(trained_model, data_iterator)
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    trained_model = torch.load(model_path,map_location=device)
+    model = trained_model['model'].eval()
+    with torch.no_grad():
+        prediction = []
+        for x, y in data_iterator:
+            output = model(x.to(device))
+            prediction.append(output.cpu().detach())
 
-    return accuracy
+    return prediction
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     # Parameters
     path = Path(__file__).parents[1] / 'config.yml'
     config = yaml.load(open(path))
 
     # Path to data to be tested
-    data_path = Path(__file__).parents[2] / 'data/processed/torch_dataset.h5'
+    data_path = Path(__file__).parents[2] / \
+        'data/processed/balanced_torch_dataset.h5'
 
     # Paramters
     parameters = {'OUTPUT': config['OUTPUT'],
@@ -78,7 +84,7 @@ if __name__=='__main__':
                   'TEST_SIZE': config['TEST_SIZE'],
                   'data_path': str(data_path)}
 
-    model_path = str(Path(__file__).parents[2] / 'models/trained_model.pth')
-    accuracy = predict(model_path, parameters)
-
-    print(accuracy)
+    model_path = str(
+        Path(__file__).parents[2] / 'models/model_Thu Mar  7 13:02:23 2019.pth')
+    prediction = predict(model_path, parameters)
+    print(prediction)

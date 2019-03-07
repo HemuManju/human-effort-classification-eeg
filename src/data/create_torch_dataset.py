@@ -108,6 +108,6 @@ if __name__ == '__main__':
     torch_dataset = create_torch_dataset(subjects, trials)
     save = True  # Save the file
     if save:
-        save_path = str(Path(__file__).parents[2]
-                        / 'data/processed/torch_dataset.h5')
+        save_path = str(Path(__file__).parents[2] /
+                        'data/processed/torch_dataset.h5')
         dd.io.save(save_path, torch_dataset)

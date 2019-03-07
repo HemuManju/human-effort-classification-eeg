@@ -4,7 +4,7 @@ import deepdish
 import pytest
 import yaml
 import h5py
-from src.models.utils import data_iterator_ids
+import numpy as np
 
 # Configuration files
 path = Path(__file__).parents[1] / 'src/config.yml'
@@ -71,8 +71,25 @@ def test_data_iterator_ids():
     Assertion whether length of test id is equal to length of validate id
 
     """
+    from src.models.utils import data_iterator_ids
     path = str(Path(__file__).parents[1] / 'data/processed/torch_dataset.h5')
     ids_list = data_iterator_ids(path, test_size=0.15)
 
     # Check validation and testing data size
     assert abs(len(ids_list['validation']) - len(ids_list['testing'])) < 2
+
+
+def test_data_balance():
+    """Test if data is balanced.
+    Returns
+    -------
+        Assertion whether the chance is less than 35%
+
+    """
+    path = str(Path(__file__).parents[1] /
+               'data/processed/balanced_torch_dataset.h5')
+    data = dd.io.load(path)
+    labels = np.array(data['labels'])
+    sum = np.sum(labels, axis=0) / len(labels)
+
+    assert (sum < 0.36).all()

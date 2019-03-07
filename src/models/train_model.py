@@ -1,11 +1,12 @@
-from visdom import Visdom
-from utils import weights_init, data_iterator_ids
+from visdom import Visdom, server
+from utils import *
 import yaml
 import torch
 from networks import ShallowEEGNet
 from torch.utils.data import DataLoader
 import torch.nn as nn
 from pathlib import Path
+from datetime import datetime
 from datasets import CustomDataset
 
 
@@ -38,11 +39,11 @@ def create_data_iterator(data_path, BATCH_SIZE, TEST_SIZE):
     # Load datasets
     data_iterator = {}
     data_iterator['training'] = DataLoader(
-        train_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=6)
+        train_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=10)
     data_iterator['validation'] = DataLoader(
-        valid_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=6)
+        valid_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=10)
     data_iterator['testing'] = DataLoader(
-        test_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=6)
+        test_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=10)
 
     return data_iterator
 
@@ -78,10 +79,13 @@ def train(network, parameters, new_weights=False):
         model.apply(weights_init)
 
     # Loss and optimizer
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.NLLLoss()
     optimizer = torch.optim.Adam(
         model.parameters(), lr=parameters['LEARNING_RATE'])
 
+    # Visual logger
+    visual_logger = visual_log('Task type classification')
+    accuracy_log = []
     for epoch in range(parameters['NUM_EPOCHS']):
         for x_batch, y_batch in data_iterator['training']:
             # Send the input and labels to gpu
@@ -96,9 +100,17 @@ def train(network, parameters, new_weights=False):
             optimizer.zero_grad()  # For batch gradient optimisation
             loss.backward()
             optimizer.step()
-        print(epoch)
 
-    return model
+        accuracy = classification_accuracy(model, data_iterator)
+        accuracy_log.append(accuracy)
+        visual_logger.log(epoch, [accuracy[0], accuracy[1], accuracy[2]])
+
+    # Save the parameters and other necessary information
+    parameters['loss_function'] = str(criterion)
+    trained_model_info = create_model_info(
+        model, parameters, np.array(accuracy_log))
+
+    return trained_model_info
 
 
 if __name__ == '__main__':
@@ -107,7 +119,8 @@ if __name__ == '__main__':
     config = yaml.load(open(path))
 
     # Path to data
-    data_path = Path(__file__).parents[2] / 'data/processed/torch_dataset.h5'
+    data_path = Path(__file__).parents[2] / \
+        'data/processed/balanced_torch_dataset.h5'
 
     # Network parameters
     parameters = {'OUTPUT': config['OUTPUT'],
@@ -117,8 +130,10 @@ if __name__ == '__main__':
                   'TEST_SIZE': config['TEST_SIZE'],
                   'data_path': str(data_path)}
 
-    trained_model = train(ShallowEEGNet, parameters)
+    trained_model_info = train(ShallowEEGNet, parameters)
     save = True
     save_path = str(Path(__file__).parents[2] / 'models')
     if save:
-        torch.save(trained_model, save_path + '/trained_model.pth')
+        time_stamp = datetime.now().strftime("%Y_%b_%d_%H_%M_%S")
+        torch.save(trained_model_info, save_path +
+                   '/model_' + time_stamp + '.pth')

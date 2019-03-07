@@ -44,7 +44,7 @@ class ShallowEEGNet(nn.Module):
         self.net_2 = nn.Sequential(
             nn.Conv2d(20, OUTPUT,
                       kernel_size=(11, 11), stride=1),
-            nn.LogSoftmax(dim=1)
+            nn.LogSoftmax()
         )
 
     def forward(self, x):
