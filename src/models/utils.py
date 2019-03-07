@@ -3,6 +3,7 @@ import deepdish as dd
 from sklearn.model_selection import train_test_split
 import numpy as np
 import torch
+import datetime
 
 
 def weights_init(model):
@@ -78,3 +79,15 @@ def data_iterator_ids(path, test_size=0.15):
     ids_list['testing'] = test_id
 
     return ids_list
+
+
+def create_model_info(model):
+
+    model_info = {'epoch': epoch,
+                  'model': model,
+                  'time': datetime.datetime.now(),
+                  'training_accuracy': accuracy['training'],
+                  'validation_accuracy': accuracy['validation']
+                  'loss': loss}
+
+    return model_info

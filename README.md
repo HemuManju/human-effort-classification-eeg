@@ -1,58 +1,56 @@
-human_robot_interaction_eeg
-==============================
+# human_robot_interaction_eeg
 
 Study of human robot interaction with robot under admittance control and monitoring of subjects using eeg
 
-Project Organization
-------------
+## Project Organization
 
-    ├── LICENSE
-    ├── Makefile           <- Makefile with commands like `make data` or `make train`
-    ├── README.md          <- The top-level README for developers using this project.
-    ├── data
-    │   ├── external       <- Data from third party sources.
-    │   ├── interim        <- Intermediate data that has been transformed.
-    │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- The original, immutable data dump.
-    │
-    ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
-    │
-    ├── models             <- Trained and serialized models, model predictions, or model summaries
-    │
-    ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-    │                         the creator's initials, and a short `-` delimited description, e.g.
-    │                         `1.0-jqp-initial-data-exploration`.
-    │
-    ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-    │
-    ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-    │   └── figures        <- Generated graphics and figures to be used in reporting
-    │
-    ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
-    │
-    ├── setup.py           <- makes project pip installable (pip install -e .) so src can be imported
-    ├── src                <- Source code for use in this project.
-    │   ├── __init__.py    <- Makes src a Python module
-    │   │
-    │   ├── data           <- Scripts to download or generate data
-    │   │   └── eeg_dataset.py <- file to generate epoched eeg data from raw eeg (not yet cleaned)
-    │   │   └── eeg_utils.py   <- various utilities for epoching and cleaning eeg files. 
-    │   │
-    │   ├── features       <- Scripts to turn raw data into features for modeling
-    │   │   └── build_features.py
-    │   │
-    │   ├── models         <- Scripts to train models and then use trained models to make
-    │   │   │                 predictions
-    │   │   ├── predict_model.py
-    │   │   └── train_model.py
-    │   │
-    │   └── visualization  <- Scripts to create exploratory and results oriented visualizations
-    │       └── visualize.py
-    │
-    └── tox.ini            <- tox file with settings for running tox; see tox.testrun.org
-
-
---------
+├── LICENSE
+├── Makefile
+├── README.md
+├── docs
+│  
+├── models
+│   └── trained_model.pth
+├── notebooks
+│   ├── CNN.ipynb
+│   ├── EEG_Data.ipynb
+│   ├── Play_Ground.ipynb
+│   ├── Unit_Tests.ipynb
+│   └── Utility_Functions.ipynb
+├── references
+├── reports
+│   └── figures
+├── requirements.txt
+├── setup.py
+├── src
+│   ├── __init__.py
+│   ├── config.yml
+│   ├── data
+│   │   ├── __init__.py
+│   │   ├── clean_eeg_dataset.py
+│   │   ├── create_eeg_dataset.py
+│   │   ├── create_robot_dataset.py
+│   │   ├── create_torch_dataset.py
+│   │   ├── eeg_utils.py
+│   │   └── robot_utils.py
+│   ├── features
+│   │   ├── __init__.py
+│   │   └── build_features.py
+│   ├── models
+│   │   ├── __init__.py
+│   │   ├── datasets.py
+│   │   ├── networks.py
+│   │   ├── predict_model.py
+│   │   ├── train_model.py
+│   │   └── utils.py
+│   └── visualization
+│       ├── __init__.py
+│       └── robot_position_plot.py
+├── test_environment.py
+├── tests
+│   ├── __init__.py
+│   └── test.py
+└── tox.ini
+* * *
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
