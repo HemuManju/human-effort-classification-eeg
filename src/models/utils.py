@@ -5,6 +5,9 @@ import numpy as np
 import torch
 import time
 from torchnet.logger import VisdomPlotLogger
+from datasets import CustomDataset
+from torch.utils.data import DataLoader
+
 
 
 def weights_init(model):
@@ -106,6 +109,51 @@ def data_iterator_ids(path, test_size=0.15):
     ids_list['testing'] = test_id
 
     return ids_list
+
+
+def create_data_iterator(parameters, predicting=False):
+    """Create data iterators.
+
+    Parameters
+    ----------
+    data_path : str
+        Path to the dataset.
+    parameters: dict
+        A dictionary of parameters
+
+    Returns
+    -------
+    dict
+        A dictionary contaning traning, validation, and testing iterator.
+
+    """
+    data_iterator = {}
+    data_path = parameters['data_path']
+    BATCH_SIZE = parameters['BATCH_SIZE']
+    TEST_SIZE = parameters['TEST_SIZE']
+    if predicting:
+        ids_list = dd.io.load(data_path, group='/data_index')
+        # Create datasets
+        test_data = CustomDataset(ids_list)
+        # Load datasets
+        data_iterator = DataLoader(test_data, batch_size=BATCH_SIZE,
+                                              shuffle=True, num_workers=10)
+    else:
+        # Load datasets
+        ids_list = data_iterator_ids(data_path, test_size=TEST_SIZE)
+        # Create datasets
+        train_data = CustomDataset(ids_list['training'])
+        valid_data = CustomDataset(ids_list['validation'])
+        test_data = CustomDataset(ids_list['testing'])
+        # Data iterators
+        data_iterator['training'] = DataLoader(
+            train_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=10)
+        data_iterator['validation'] = DataLoader(
+            valid_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=10)
+        data_iterator['testing'] = DataLoader(
+            test_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=10)
+
+    return data_iterator
 
 
 def visual_log(title):

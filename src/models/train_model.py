@@ -10,44 +10,6 @@ from datetime import datetime
 from datasets import CustomDataset
 
 
-def create_data_iterator(data_path, BATCH_SIZE, TEST_SIZE):
-    """Create data iterators.
-
-    Parameters
-    ----------
-    data_path : str
-        Path to the dataset.
-    BATCH_SIZE : int
-        Batch size of the data.
-    TEST_SIZE : float
-        Test size e.g 0.3 is 30% of the test data.
-
-    Returns
-    -------
-    dict
-        A dictionary contaning traning, validation, and testing iterator.
-
-    """
-
-    ids_list = data_iterator_ids(data_path, test_size=TEST_SIZE)
-
-    # Create datasets
-    train_data = CustomDataset(ids_list['training'])
-    valid_data = CustomDataset(ids_list['validation'])
-    test_data = CustomDataset(ids_list['testing'])
-
-    # Load datasets
-    data_iterator = {}
-    data_iterator['training'] = DataLoader(
-        train_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=10)
-    data_iterator['validation'] = DataLoader(
-        valid_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=10)
-    data_iterator['testing'] = DataLoader(
-        test_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=10)
-
-    return data_iterator
-
-
 def train(network, parameters, new_weights=False):
     """Main function to run the optimization..
 
@@ -70,8 +32,7 @@ def train(network, parameters, new_weights=False):
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     print('Computation device being used:', device)
 
-    data_iterator = create_data_iterator(parameters['data_path'],
-                                         parameters['BATCH_SIZE'], parameters['TEST_SIZE'])
+    data_iterator = create_data_iterator(parameters)
 
     # An instance of model
     model = network(parameters['OUTPUT']).to(device)
@@ -105,7 +66,7 @@ def train(network, parameters, new_weights=False):
         accuracy_log.append(accuracy)
         visual_logger.log(epoch, [accuracy[0], accuracy[1], accuracy[2]])
 
-    # Save the parameters and other necessary information
+    # Add loss function info to parameter.
     parameters['loss_function'] = str(criterion)
     trained_model_info = create_model_info(
         model, parameters, np.array(accuracy_log))
