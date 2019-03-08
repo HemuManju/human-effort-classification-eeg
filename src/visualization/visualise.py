@@ -50,7 +50,8 @@ def plot_model_accuracy(model_path):
 
     epochs = np.arange(training_accuracy.shape[0])
 
-    plt.plot(epochs, training_accuracy)
+    plt.plot(epochs, training_accuracy, epochs,
+             validation_accuracy, epochs, testing_accuracy)
     plt.show()
 
     return None

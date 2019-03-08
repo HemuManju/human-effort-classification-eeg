@@ -35,7 +35,7 @@ class ShallowEEGNet(nn.Module):
 
         self.net_1 = nn.Sequential(
             nn.Conv2d(1, 20, kernel_size=(1, 15), stride=1, bias=False),
-            nn.Conv2d(20, 20, kernel_size=(10, 10), stride=1, bias=False),
+            nn.Conv2d(20, 20, kernel_size=(20, 20), stride=1, bias=False),
             nn.BatchNorm2d(20, momentum=0.1, affine=True)
         )
 
@@ -43,7 +43,7 @@ class ShallowEEGNet(nn.Module):
 
         self.net_2 = nn.Sequential(
             nn.Conv2d(20, OUTPUT,
-                      kernel_size=(11, 11), stride=1),
+                      kernel_size=(1, 10), stride=1),
             nn.LogSoftmax(dim=1)
         )
 

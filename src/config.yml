@@ -12,7 +12,7 @@ n_electrodes: 20
 s_freq:       256
 n_class: 3
 OUTPUT: 3
-NUM_EPOCHS: 1
+NUM_EPOCHS: 200
 BATCH_SIZE: 64
 LEARNING_RATE: 0.001
 TEST_SIZE: 0.15
