@@ -68,10 +68,9 @@ def train(network, parameters, new_weights=False):
 
     # Add loss function info to parameter.
     parameters['loss_function'] = str(criterion)
-    trained_model_info = create_model_info(
-        model, parameters, np.array(accuracy_log))
+    model_info = create_model_info(parameters, np.array(accuracy_log))
 
-    return trained_model_info
+    return model, model_info
 
 
 if __name__ == '__main__':
@@ -91,10 +90,15 @@ if __name__ == '__main__':
                   'TEST_SIZE': config['TEST_SIZE'],
                   'data_path': str(data_path)}
 
-    trained_model_info = train(ShallowEEGNet, parameters)
+    trained_model, trained_model_info = train(ShallowEEGNet, parameters)
     save = True
     save_path = str(Path(__file__).parents[2] / 'models')
     if save:
         time_stamp = datetime.now().strftime("%Y_%b_%d_%H_%M_%S")
-        torch.save(trained_model_info, save_path +
+        torch.save(trained_model, save_path +
                    '/model_' + time_stamp + '.pth')
+        torch.save(trained_model_info, save_path +
+                   '/model_info_' + time_stamp + '.pth')
+        # Save time also
+        with open(save_path + '/time.txt', "a") as f:
+            f.write(time_stamp + '\n')

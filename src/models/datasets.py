@@ -19,16 +19,16 @@ class CustomDataset(Dataset):
 
     """
 
-    def __init__(self, ids_list):
+    def __init__(self, ids_list, data_path):
         super(CustomDataset, self).__init__()
         self.ids_list = ids_list
+        self.path = str(data_path)
 
     def __getitem__(self, index):
         id = self.ids_list[index]
         # Read only specific data
-        path = Path(__file__).parents[2] / 'data/processed/torch_dataset.h5'
-        x = dd.io.load(str(path), group='/features', sel=dd.aslice[id, :, :])
-        y = dd.io.load(str(path), group='/labels', sel=dd.aslice[id, :])
+        x = dd.io.load(self.path, group='/features', sel=dd.aslice[id, :, :])
+        y = dd.io.load(self.path, group='/labels', sel=dd.aslice[id, :])
         # Convert to torch tensors
         x = torch.from_numpy(x).type(torch.float32)
         y = torch.from_numpy(y).type(torch.float32)
