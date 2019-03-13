@@ -59,7 +59,7 @@ def data_iterator_ids(path, test_size=0.15):
     return ids_list
 
 
-def create_data_iterator(parameters, predicting=False):
+def collective_data_iterator(parameters, predicting=False):
     """Create data iterators.
 
     Parameters
