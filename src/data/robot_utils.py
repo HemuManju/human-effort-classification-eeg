@@ -11,6 +11,8 @@ from itertools import product
 from eeg_utils import get_trial_path, read_eeg_epochs
 import pybullet as pb
 import pybullet_data
+from mne.parallel import parallel_func
+import deepdish as dd
 
 
 # Import configuration
@@ -60,14 +62,14 @@ def append_xyz(subject, trial):
     """
     trial_path = get_trial_path(subject, trial)
     joint_angles = np.genfromtxt(trial_path, dtype=float, delimiter=',',
-                         usecols=[1, 2, 3, 4, 5, 6],
-                         skip_header=1).tolist()
+                                 usecols=[1, 2, 3, 4, 5, 6],
+                                 skip_header=1).tolist()
     data = np.insert(joint_angles, 0, 0, axis=1)  # Add zero for base of robot
     # Perform forward kinematics to get x, y, and z
     obs = forward_kinematics(np.array(data))
     df = pd.read_csv(trial_path, delimiter=',')
-    df[' X'], df[' Y'], df[' Z'] = obs[:,0], obs[:,1], obs[:,2]
-    df.to_csv(trial_path, index=False) # Save the data
+    df[' X'], df[' Y'], df[' Z'] = obs[:, 0], obs[:, 1], obs[:, 2]
+    df.to_csv(trial_path, index=False)  # Save the data
 
     return None
 
@@ -93,15 +95,20 @@ def forward_kinematics(joint_angles):
     pb.setAdditionalSearchPath(pybullet_data.getDataPath())
     pb.setGravity(0, 0, -9.81)
     pb.loadURDF("plane.urdf", start_pos)
-    robot_path = path = str(Path(__file__).parents[1] / 'power_ball/powerball.urdf')
-    robot = pb.loadURDF(robot_path, start_pos, start_orientation, useFixedBase=True)
+    robot_path = path = str(
+        Path(__file__).parents[1] / 'power_ball/powerball.urdf')
+    robot = pb.loadURDF(robot_path, start_pos,
+                        start_orientation, useFixedBase=True)
 
     obs = []
     pb.setRealTimeSimulation(enableRealTimeSimulation=1)
     for q in joint_angles:
-        pb.setJointMotorControlArray(robot, range(7), controlMode=pb.POSITION_CONTROL, targetPositions=q)  # set the joint angles
+        pb.setJointMotorControlArray(robot, range(
+            7), controlMode=pb.POSITION_CONTROL, targetPositions=q)  # set the joint angles
         pb.stepSimulation()  # Execute the forward kinematics
         obs.append(pb.getLinkState(robot, 6)[0])
+
+    pb.disconnect()  # Terminate the connection
 
     return np.array(obs)
 
@@ -127,7 +134,6 @@ def get_robot_data(subject, trial):
     time_data = np.genfromtxt(trial_path, dtype=str, delimiter=',',
                               usecols=0, skip_footer=150,
                               skip_header=100).tolist()
-
     # Get the sampling frequency
     time = [datetime.strptime(item, '%H:%M:%S:%f') for item in time_data]
     time = np.array(time)  # convert to numpy
@@ -175,11 +181,11 @@ def create_robot_epochs(subject, trial):
 
     """
     data, start_time, end_time, duration = get_robot_data(subject, trial)
-    info = mne.create_info(ch_names=['x', 'y', 'force_x','force_y',
-                    'total_force','moment_x', 'moment_y',
-                    'total_moment', 'smooth_force'],
-                    ch_types=['misc'] * data.shape[0],
-                    sfreq=256.0)
+    info = mne.create_info(ch_names=['x', 'y', 'force_x', 'force_y',
+                                     'total_force', 'moment_x', 'moment_y',
+                                     'total_moment', 'smooth_force'],
+                           ch_types=['misc'] * data.shape[0],
+                           sfreq=256.0)
     raw = mne.io.RawArray(data, info, verbose=False)
     # Additional information
     meas_time = str(start_time) + '..' + str(end_time) + '..' + str(duration)
@@ -191,18 +197,12 @@ def create_robot_epochs(subject, trial):
                         tmax=epoch_length, verbose=False)
 
     # Sync with eeg time
-    eeg_epochs = read_eeg_epochs(subject, trial) # eeg file
-    drop_id = [id for id, val in enumerate(eeg_epochs.drop_log) if id]
-    if len(eeg_epochs.drop_log)!=len(epochs.drop_log):
-            raise Exception('Two epochs are not of same length!')
+    eeg_epochs = read_eeg_epochs(subject, trial)  # eeg file
+    drop_id = [id for id, val in enumerate(eeg_epochs.drop_log) if val]
+    print(drop_id)
+    if len(eeg_epochs.drop_log) != len(epochs.drop_log):
+        raise Exception('Two epochs are not of same length!')
     else:
         epochs.drop(drop_id)
 
     return epochs
-
-
-subjects = config['subjects']
-trials = config['trials']
-
-for subject, trial in product(subjects, trials):
-    append_xyz(subject, trial)

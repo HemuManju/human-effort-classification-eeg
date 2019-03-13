@@ -2,6 +2,7 @@ from eeg_utils import *
 import deepdish as dd
 from autoreject import get_rejection_threshold
 import yaml
+import collections
 
 
 def autoreject_repair_epochs(epochs, reject_plot=False):

@@ -7,8 +7,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sb
 
-config = yaml.load(open(str(Path(__file__).parents[1]) + '/config.yml'))
-
 
 def robot_position_plot(subject, trial):
     """Short summary.
@@ -22,14 +20,16 @@ def robot_position_plot(subject, trial):
 
     """
     # Read the data from processed data folder
-    path = str(Path(__file__).parents[2] / config['robot_dataset'])
+    path = str(Path(__file__).parents[2] / config['raw_robot_dataset'])
     all_data = dd.io.load(path)
     sub_data = all_data[subject]['robot'][trial]
     n_features = len(sub_data.info['ch_names'])
     data = sub_data.get_data()
+    print(data.shape)
     sub_data = data.transpose(1, 0, 2).reshape(n_features, -1)
+    print(sub_data[0, :].shape)
     # plotting
-    plt.plot(sub_data[0, :], sub_data[1, :])
+    plt.plot(sub_data[1, :], sub_data[0, :])  # robot co-ordinates are flipped
     plt.show()
 
     return None
@@ -65,6 +65,9 @@ def plot_model_accuracy(model_path):
 
 if __name__ == '__main__':
     # Parameters
+    config = yaml.load(open(str(Path(__file__).parents[1]) + '/config.yml'))
+    subjects = config['subjects']
+    trials = config['trials']
     path = str(Path(__file__).parents[2] / 'models')
     with open(path + '/time.txt', "r+") as f:
         time_stamp = f.readlines()
@@ -72,5 +75,5 @@ if __name__ == '__main__':
     model_path = path + '/model_' + time_stamp + '.pth'
     model_info_path = path + '/model_info_' + time_stamp + '.pth'
 
-    # robot_position_plot(subjects[0], trials[1])
-    plot_model_accuracy(model_info_path)
+    robot_position_plot(subjects[0], trials[0])
+    # plot_model_accuracy(model_info_path)

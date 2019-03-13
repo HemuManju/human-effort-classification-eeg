@@ -12,9 +12,12 @@ from autoreject import Ransac, AutoReject
 from mne.time_frequency import tfr_stockwell, psd_array_welch, psd_welch, psd_multitaper
 from autoreject import get_rejection_threshold
 import yaml
+import deepdish as dd
+
 
 # Import configuration
 config = yaml.load(open(str(Path(__file__).parents[1]) + '/config.yml'))
+
 
 def get_eeg_path(subject, raw=True):
     """Get the EEG file path and Force data path of a subject.
