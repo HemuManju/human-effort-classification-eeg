@@ -106,13 +106,11 @@ def clean_dataset(subject, trial):
     """
 
     clean_eeg_dataset = {}
-    raw_eeg = dd.io.load('../data/interim/raw_eeg.h5')  # load the raw eeg
+    read_path = Path(__file__).parents[2] / config['raw_eeg_dataset']
+    raw_eeg = dd.io.load(str(read_path))  # load the raw eeg
 
     for subject in subjects:
-        data = {'eeg': {'HighFine': None, 'HighGross': None,
-                        'LowFine': None, 'LowGross': None},
-                'ica': {'HighFine': None, 'HighGross': None,
-                        'LowFine': None, 'LowGross': None}}
+        data = data = collections.defaultdict(dict)
         for trial in trials:
             epochs = raw_eeg[subject]['eeg'][trial]
             ica_epochs, ica = clean_with_ica(epochs)
@@ -134,5 +132,5 @@ if __name__ == '__main__':
     save = True  # Save the file
     if save:
         save_path = Path(__file__).parents[2] / \
-            'data/interim/clean_eeg_dataset.h5'
+            'data/interim/clean_eeg_exp_2_dataset.h5'
         dd.io.save(save_path, clean_dataset)

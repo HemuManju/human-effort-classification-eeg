@@ -36,7 +36,7 @@ def convert_to_array(subject, trial):
     subject : string
         Subject ID e.g. 7707.
     trial : string
-        e.g. HighFine, HighGross, LowFine, LowGross.
+        e.g. HighFine, HighGross, LowFine, LowGross, AdoptComb, HighComb etc.
 
     Returns
     -------
@@ -45,9 +45,10 @@ def convert_to_array(subject, trial):
 
     """
     eeg_path = str(
-        Path(__file__).parents[2] / 'data/interim/clean_eeg_dataset.h5')
+        Path(__file__).parents[2] / config['clean_eeg_dataset'])
     data = dd.io.load(eeg_path, group='/' + subject)
     x = data['eeg'][trial].get_data()
+
     if trial == 'HighFine':
         category = [1, 0, 0]
     if trial == 'LowGross':
@@ -56,7 +57,12 @@ def convert_to_array(subject, trial):
         category = [0, 0, 1]
 
     x_array = x[:, 0:n_electrodes, 0:epoch_length * s_freq]
-    y_array = one_hot_encode(x.shape[0], category)
+
+    # In order to accomodate training
+    try:
+        y_array = one_hot_encode(x.shape[0], category)
+    except:
+        y_array = np.zeros((x.shape[0], 3))
 
     return x_array, y_array
 
@@ -69,7 +75,7 @@ def create_torch_dataset(subjects, trials):
     subject : string
         Subject ID e.g. 7707.
     trial : string
-        e.g. HighFine, HighGross, LowFine, LowGross.
+        e.g. HighFine, HighGross, LowFine, LowGross, AdoptComb, HighComb etc.
 
     Returns
     -------
@@ -108,6 +114,6 @@ if __name__ == '__main__':
     torch_dataset = create_torch_dataset(subjects, trials)
     save = True  # Save the file
     if save:
-        save_path = str(Path(__file__).parents[2] /
-                        'data/processed/torch_dataset.h5')
+        save_path = str(Path(__file__).parents[2]
+                        / 'data/processed/torch_exp_2_dataset.h5')
         dd.io.save(save_path, torch_dataset)

@@ -14,27 +14,27 @@ subjects = config['subjects']
 trials = config['trials']
 
 
-@pytest.mark.skip(reason='slow')
-def test_eeg_data_length():
+# @pytest.mark.skip(reason='slow')
+def test_eeg_dataset_length():
     """Test the number of subjects in eeg dataset.
 
     Returns
     -------
     Assertion with respect to the total number of subjects
     """
-    # Raw data
-    path = str(Path(__file__).parents[1] / 'data/interim/raw_eeg_dataset.h5')
+    # Raw dataset
+    path = str(Path(__file__).parents[1] / config['raw_eeg_dataset'])
     data = dd.io.load(path)
     assert (len(data.keys()) == len(subjects))
 
-    # Clean data
-    path = str(Path(__file__).parents[1] / 'data/interim/clean_eeg_dataset.h5')
+    # Clean dataset
+    path = str(Path(__file__).parents[1] / config['clean_eeg_dataset'])
     data = dd.io.load(path)
     assert (len(data.keys()) == len(subjects))
 
 
-@pytest.mark.skip(reason='slow')
-def test_robot_data_length():
+@pytest.mark.skip(reason='need to do')
+def test_robot_dataset_length():
     """Test the number of subjects in robot dataset.
 
     Returns
@@ -47,7 +47,8 @@ def test_robot_data_length():
     assert (len(data.keys()) == len(subjects))
 
 
-def test_torch_data_length():
+@pytest.mark.skip(reason='need to do')
+def test_torch_dataset_length():
     """Test whether number of features and labels are same.
 
     Returns
@@ -63,6 +64,7 @@ def test_torch_data_length():
     assert (n_labels == n_features)
 
 
+@pytest.mark.skip(reason='need to do')
 def test_data_iterator_ids():
     """Short summary.
 
@@ -79,6 +81,7 @@ def test_data_iterator_ids():
     assert abs(len(ids_list['validation']) - len(ids_list['testing'])) < 2
 
 
+@pytest.mark.skip(reason='need to do')
 def test_data_balance():
     """Test if data is balanced.
     Returns
@@ -86,8 +89,8 @@ def test_data_balance():
         Assertion whether the chance is less than 35%
 
     """
-    path = str(Path(__file__).parents[1] /
-               'data/processed/balanced_torch_dataset.h5')
+    path = str(Path(__file__).parents[1]
+               / 'data/processed/balanced_torch_dataset.h5')
     data = dd.io.load(path)
     labels = np.array(data['labels'])
     sum = np.sum(labels, axis=0) / len(labels)

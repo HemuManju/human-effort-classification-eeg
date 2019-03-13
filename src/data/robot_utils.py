@@ -6,7 +6,9 @@ from scipy import signal
 from scipy.signal import resample
 from datetime import datetime
 import yaml
-from eeg_utils import get_trial_path
+from math import pi
+from itertools import product
+from eeg_utils import get_trial_path, read_eeg_epochs
 import pybullet as pb
 import pybullet_data
 
@@ -39,6 +41,69 @@ def resample_robot_data(x, freq_in, freq_out):
     out = resample(x, n_samples)
 
     return out
+
+
+def append_xyz(subject, trial):
+    """Appends x, y, and z co-ordinates of end effectors to the data file. This function needs to run only once.
+
+    Parameters
+    ----------
+    subject : string
+        subject ID e.g. 7707.
+    trial : string
+        trial e.g. HighFine.
+
+    Returns
+    -------
+    None
+
+    """
+    trial_path = get_trial_path(subject, trial)
+    joint_angles = np.genfromtxt(trial_path, dtype=float, delimiter=',',
+                         usecols=[1, 2, 3, 4, 5, 6],
+                         skip_header=1).tolist()
+    data = np.insert(joint_angles, 0, 0, axis=1)  # Add zero for base of robot
+    # Perform forward kinematics to get x, y, and z
+    obs = forward_kinematics(np.array(data))
+    df = pd.read_csv(trial_path, delimiter=',')
+    df[' X'], df[' Y'], df[' Z'] = obs[:,0], obs[:,1], obs[:,2]
+    df.to_csv(trial_path, index=False) # Save the data
+
+    return None
+
+
+def forward_kinematics(joint_angles):
+    """Calculate the poisition of the end effector given joint angles.
+
+    Parameters
+    ----------
+    joint_angles : array (6 joint angles)
+        Joint angles of the data.
+
+    Returns
+    -------
+    an array
+        x, y, and z position of the end effector.
+
+    """
+    # Setup the scene for forwad kinematics
+    start_pos = [0, 0, 0]
+    start_orientation = pb.getQuaternionFromEuler([0, 0, 0])
+    pb.connect(pb.DIRECT)
+    pb.setAdditionalSearchPath(pybullet_data.getDataPath())
+    pb.setGravity(0, 0, -9.81)
+    pb.loadURDF("plane.urdf", start_pos)
+    robot_path = path = str(Path(__file__).parents[1] / 'power_ball/powerball.urdf')
+    robot = pb.loadURDF(robot_path, start_pos, start_orientation, useFixedBase=True)
+
+    obs = []
+    pb.setRealTimeSimulation(enableRealTimeSimulation=1)
+    for q in joint_angles:
+        pb.setJointMotorControlArray(robot, range(7), controlMode=pb.POSITION_CONTROL, targetPositions=q)  # set the joint angles
+        pb.stepSimulation()  # Execute the forward kinematics
+        obs.append(pb.getLinkState(robot, 6)[0])
+
+    return np.array(obs)
 
 
 def get_robot_data(subject, trial):
@@ -93,39 +158,6 @@ def get_robot_data(subject, trial):
     return robot_data, start_time, end_time, duration
 
 
-def forward_kinematics(joint_angles):
-    """Calculate the poisition of the end effector given joint angles.
-
-    Parameters
-    ----------
-    joint_angles : array (6 joint angles)
-        Joint angles of the data.
-
-    Returns
-    -------
-    an array
-        x, y, and z position of the end effector.
-
-    """
-    # Setup the scene for forwad kinematics
-    pb.connect(pb.DIRECT)
-    pb.setAdditionalSearchPath(pybullet_data.getDataPath())
-    pb.setGravity(0, 0, -9.81)
-    pb.loadURDF("plane.urdf", start_pos)
-    robot = pb.loadURDF("powerball.urdf", start_pos,
-                        start_orientation, useFixedBase=True)
-
-    obs = []
-    pb.setRealTimeSimulation(enableRealTimeSimulation=1)
-    for q in joint_angles:
-        pb.setJointMotorControlArray(robot, range(7), controlMode=pb.POSITION_CONTROL,
-                                     targetPositions=q)  # set the joint angles
-        pb.stepSimulation()  # Execute the forward kinematics
-        obs.append(pb.getLinkState(robot, 6)[0])
-
-    return np.array(obs)
-
-
 def create_robot_epochs(subject, trial):
     """Get the epcohed force data.
 
@@ -143,20 +175,34 @@ def create_robot_epochs(subject, trial):
 
     """
     data, start_time, end_time, duration = get_robot_data(subject, trial)
-    print(data.shape)
-    info = mne.create_info(ch_names=['x', 'y', 'force_x', 'force_y', 'total_force',
-                                     'moment_x', 'moment_y', 'total_moment', 'smooth_force'],
-                           ch_types=['misc'] * data.shape[0],
-                           sfreq=256.0)
+    info = mne.create_info(ch_names=['x', 'y', 'force_x','force_y',
+                    'total_force','moment_x', 'moment_y',
+                    'total_moment', 'smooth_force'],
+                    ch_types=['misc'] * data.shape[0],
+                    sfreq=256.0)
     raw = mne.io.RawArray(data, info, verbose=False)
     # Additional information
     meas_time = str(start_time) + '..' + str(end_time) + '..' + str(duration)
     raw.info['description'] = meas_time
     raw.info['subject_info'] = subject
     raw.info['experimenter'] = 'hemanth'
-
     events = mne.make_fixed_length_events(raw, duration=epoch_length)
     epochs = mne.Epochs(raw, events, tmin=0,
                         tmax=epoch_length, verbose=False)
 
+    # Sync with eeg time
+    eeg_epochs = read_eeg_epochs(subject, trial) # eeg file
+    drop_id = [id for id, val in enumerate(eeg_epochs.drop_log) if id]
+    if len(eeg_epochs.drop_log)!=len(epochs.drop_log):
+            raise Exception('Two epochs are not of same length!')
+    else:
+        epochs.drop(drop_id)
+
     return epochs
+
+
+subjects = config['subjects']
+trials = config['trials']
+
+for subject, trial in product(subjects, trials):
+    append_xyz(subject, trial)

@@ -19,8 +19,7 @@ def create_dataset(subjects, trials):
     """
     robot_dataset = {}
     for subject in subjects:
-        data = {'robot': {'HighFine': None, 'HighGross': None,
-                          'LowFine': None, 'LowGross': None}}
+        data = collections.defaultdict(dict)
         for trial in trials:
             data['robot'][trial] = create_robot_epochs(subject, trial)
         robot_dataset[subject] = data

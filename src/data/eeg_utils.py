@@ -15,8 +15,6 @@ import yaml
 
 # Import configuration
 config = yaml.load(open(str(Path(__file__).parents[1]) + '/config.yml'))
-epoch_length = config['epoch_length']
-
 
 def get_eeg_path(subject, raw=True):
     """Get the EEG file path and Force data path of a subject.
@@ -32,7 +30,7 @@ def get_eeg_path(subject, raw=True):
 
     """
     # EEG file
-    path = Path(__file__).parents[2] / 'data/raw/eeg_data/' / subject
+    path = Path(__file__).parents[2] / config['raw_eeg_path'] / subject
     fname = [str(f) for f in path.iterdir() if f.suffix == '.edf']
     fname.sort()
     if raw:
@@ -57,11 +55,12 @@ def get_trial_path(subject, trial):
 
     """
     # Trial time
-    path = Path(__file__).parents[2] / 'data/raw/force_data/' / subject
-    fname = [str(f) for f in path.iterdir() if f.suffix == '.csv']
-    fname.sort()
-    idx = ['HighFine', 'HighGross', 'LowFine', 'LowGross'].index(trial)
-    trial_path = fname[idx]
+    path = Path(__file__).parents[2] / config['raw_robot_path'] / subject
+    for file in path.iterdir():
+        file_name = file.name.split('_')
+        if file_name[1] == trial:
+            break
+    trial_path = file
 
     return trial_path
 
@@ -123,7 +122,7 @@ def get_trial_time(subject, trial):
 
 
 def get_eeg_data(subject):
-    """Get the eeg data excluding unnessary channels from edf file.
+    """Get the eeg data excluding unnecessary channels from edf file.
 
     Parameter
     ----------
@@ -153,7 +152,7 @@ def get_eeg_data(subject):
 
     # Additional information
     meas_date = 'measure_time:' + eeg_time.strftime('%m-%d-%Y,%H:%M:%S')
-    raw_selected.info['description'] = me
+    raw_selected.info['description'] = meas_date
     raw_selected.info['subject_info'] = subject
     raw_selected.info['experimenter'] = 'hemanth'
 
@@ -174,7 +173,6 @@ def create_eeg_epochs(subject, trial, preload=True):
 
     """
     trial_start, trial_end = get_trial_time(subject, trial)
-    print(trial_start, trial_end)
     raw = get_eeg_data(subject)
     raw_cropped = raw.copy().crop(tmin=trial_start, tmax=trial_end)  # Crop the trials
     raw_cropped.notch_filter(60, filter_length='auto',
@@ -182,8 +180,33 @@ def create_eeg_epochs(subject, trial, preload=True):
     raw_cropped.filter(l_freq=1, h_freq=50, fir_design='firwin',
                        verbose=False)  # Band pass filter
     raw_cropped.set_eeg_reference('average')
-    events = mne.make_fixed_length_events(raw_cropped, duration=epoch_length)
+    events = mne.make_fixed_length_events(
+        raw_cropped, duration=config['epoch_length'])
     epochs = mne.Epochs(raw_cropped, events, tmin=0,
-                        tmax=epoch_length, verbose=False, preload=preload)
+                        tmax=config['epoch_length'], verbose=False, preload=preload)
 
     return epochs
+
+
+def read_eeg_epochs(subject, trial):
+    """Reads the eeg epoch file of given subject and trial
+
+    Parameters
+    ----------
+    subject : string
+        Subject ID e.g. 7707.
+    trial : string
+        e.g. HighFine, HighGross, LowFine, LowGross, AdoptComb, HighComb etc.
+
+    Returns
+    -------
+    epoch
+        EEG epoch.
+
+    """
+    eeg_path = str(
+        Path(__file__).parents[2] / config['clean_eeg_dataset'])
+    data = dd.io.load(eeg_path, group='/' + subject)
+    eeg_epochs = data['eeg'][trial]
+
+    return eeg_epochs

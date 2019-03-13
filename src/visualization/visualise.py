@@ -5,6 +5,9 @@ from pathlib import Path
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sb
+
+config = yaml.load(open(str(Path(__file__).parents[1]) + '/config.yml'))
 
 
 def robot_position_plot(subject, trial):
@@ -19,7 +22,7 @@ def robot_position_plot(subject, trial):
 
     """
     # Read the data from processed data folder
-    path = str(Path(__file__).parents[2] / 'data/interim/robot_dataset.h5')
+    path = str(Path(__file__).parents[2] / config['robot_dataset'])
     all_data = dd.io.load(path)
     sub_data = all_data[subject]['robot'][trial]
     n_features = len(sub_data.info['ch_names'])
@@ -50,8 +53,11 @@ def plot_model_accuracy(model_path):
 
     epochs = np.arange(training_accuracy.shape[0])
 
+    sb.set()
     plt.plot(epochs, training_accuracy, epochs,
              validation_accuracy, epochs, testing_accuracy)
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
     plt.show()
 
     return None

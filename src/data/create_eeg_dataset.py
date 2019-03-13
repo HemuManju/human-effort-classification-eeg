@@ -1,6 +1,7 @@
 from eeg_utils import *
 import deepdish as dd
 import yaml
+import collections
 
 
 def create_dataset(subjects, trials):
@@ -18,8 +19,7 @@ def create_dataset(subjects, trials):
     """
     eeg_dataset = {}
     for subject in subjects:
-        data = {'eeg': {'HighFine': None, 'HighGross': None,
-                        'LowFine': None, 'LowGross': None}}
+        data = collections.defaultdict(dict)
         for trial in trials:
             data['eeg'][trial] = create_eeg_epochs(subject, trial)
         eeg_dataset[subject] = data
@@ -34,8 +34,8 @@ if __name__ == '__main__':
     trials = config['trials']
     # Main file
     eeg_dataset = create_dataset(subjects, trials)
-    save = False  # Save the file
+    save = True  # Save the file
     if save:
         save_path = Path(__file__).parents[2] / \
-            'data/interim/raw_eeg_dataset.h5'
+            'data/interim/raw_eeg_exp_2_dataset.h5'
         dd.io.save(save_path, eeg_dataset)
