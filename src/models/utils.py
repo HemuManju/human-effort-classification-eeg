@@ -5,8 +5,13 @@ import numpy as np
 import torch
 import time
 from torchnet.logger import VisdomPlotLogger
-from datasets import CustomDataset
+from datasets import CollectiveDataset, SubjectSpecificDataset
 from torch.utils.data import DataLoader
+from pathlib import Path
+import yaml
+
+path = Path(__file__).parents[1] / 'config.yml'
+config = yaml.load(open(path))
 
 
 def weights_init(model):
@@ -77,17 +82,17 @@ def create_data_iterator(parameters, predicting=False):
     if predicting:
         ids_list = dd.io.load(data_path, group='/data_index')
         # Create datasets
-        test_data = CustomDataset(ids_list, data_path)
+        test_data = CollectiveDataset(ids_list, data_path)
         # Load datasets
         data_iterator = DataLoader(test_data, batch_size=BATCH_SIZE,
-                                   shuffle=True, num_workers=10)
+                                   shuffle=False, num_workers=10)
     else:
         # Load datasets
         ids_list = data_iterator_ids(data_path, test_size=TEST_SIZE)
         # Create datasets
-        train_data = CustomDataset(ids_list['training'], data_path)
-        valid_data = CustomDataset(ids_list['validation'], data_path)
-        test_data = CustomDataset(ids_list['testing'], data_path)
+        train_data = CollectiveDataset(ids_list['training'], data_path)
+        valid_data = CollectiveDataset(ids_list['validation'], data_path)
+        test_data = CollectiveDataset(ids_list['testing'], data_path)
         # Data iterators
         data_iterator['training'] = DataLoader(
             train_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=10)
@@ -95,6 +100,41 @@ def create_data_iterator(parameters, predicting=False):
             valid_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=10)
         data_iterator['testing'] = DataLoader(
             test_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=10)
+
+    return data_iterator
+
+
+def subject_specific_data_iterator(subject, trial):
+    """A subject specific data iterator.
+
+    Parameters
+    ----------
+    subject : string
+        Subject ID e.g. 7707.
+    trial : string
+        e.g. HighFine, HighGross, LowFine, LowGross, AdoptComb, HighComb etc.
+
+    Returns
+    -------
+    pytorch dataiterator
+        A pytorch data iterator
+
+    """
+
+    # Parameters
+    n_electrodes = config['n_electrodes']
+    epoch_length = config['epoch_length']
+    s_freq = config['s_freq']
+    data_path = str(
+        Path(__file__).parents[2] / config['clean_eeg_dataset'])
+    data = dd.io.load(data_path, group='/' + subject)
+    x = data['eeg'][trial].get_data()
+    x = x[:, 0:n_electrodes, 0:epoch_length * s_freq]
+    # Create datasets
+    test_data = SubjectSpecificDataset(x)
+    # Load datasets
+    data_iterator = DataLoader(test_data, batch_size=config['BATCH_SIZE'],
+                               shuffle=False, num_workers=10)
 
     return data_iterator
 
@@ -121,6 +161,35 @@ def classification_accuracy(model, data_iterator):
         accuracy.append(calculate_accuracy(model, data_iterator, key))
 
     return accuracy
+
+
+def calculate_predictions(trained_model, data_iterator, parameters):
+    """Calculate the predictions from the model, .
+
+    Parameters
+    ----------
+    trained_model : pytorch object
+        A trained pytorch model.
+    data_iterator : pytorch object
+        A pytorch dataset.
+    subject : str
+        A key to select which dataset to evaluate
+
+    Returns
+    -------
+    Array
+        Labels for the given subject and dataset.
+
+    """
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    output = np.empty((0, parameters['OUTPUT']))
+    with torch.no_grad():
+        for x in data_iterator:
+            temp = trained_model(x.to(device)).cpu().detach()
+            output = np.concatenate((output, temp.numpy()), axis=0)
+    predicted_labels = np.argmax(output, axis=1)
+
+    return predicted_labels
 
 
 def calculate_accuracy(model, data_iterator, key):

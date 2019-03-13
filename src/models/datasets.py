@@ -5,8 +5,38 @@ from torch.utils.data import Dataset
 import deepdish as dd
 
 
-class CustomDataset(Dataset):
-    """Short summary.
+class SubjectSpecificDataset(Dataset):
+    """A subject specific dataset class.
+
+    Parameters
+    ----------
+    x : array
+        Input array of the .
+
+    Attributes
+    ----------
+    length : int
+        Length of the dataset.
+
+    """
+
+    def __init__(self, x_data):
+        super(SubjectSpecificDataset, self).__init__()
+        self.length = x_data.shape[0]
+        self.data = x_data
+
+    def __getitem__(self, index):
+        # Convert to torch tensors
+        x = torch.from_numpy(self.data[index, :, :]).type(torch.float32)
+
+        return x
+
+    def __len__(self):
+        return self.length
+
+
+class CollectiveDataset(Dataset):
+    """All subject dataset class.
 
     Parameters
     ----------
@@ -20,7 +50,7 @@ class CustomDataset(Dataset):
     """
 
     def __init__(self, ids_list, data_path):
-        super(CustomDataset, self).__init__()
+        super(CollectiveDataset, self).__init__()
         self.ids_list = ids_list
         self.path = str(data_path)
 
