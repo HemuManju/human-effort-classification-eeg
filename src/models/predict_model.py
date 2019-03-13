@@ -1,4 +1,4 @@
-from utils import classification_accuracy, data_iterator_ids
+from utils import *
 import yaml
 import torch
 from networks import ShallowEEGNet
@@ -6,35 +6,6 @@ import deepdish as dd
 from torch.utils.data import DataLoader
 from pathlib import Path
 from datasets import CustomDataset
-
-
-def create_data_iterator(data_path, BATCH_SIZE, TEST_SIZE):
-    """Create data iterators.
-
-    Parameters
-    ----------
-    data_path : str
-        Path to the dataset.
-    BATCH_SIZE : int
-        Batch size of the data.
-    TEST_SIZE : float
-        Test size e.g 0.3 is 30% of the test data.
-
-    Returns
-    -------
-    pytorch object
-        A dataset iterator.
-
-    """
-    ids_list = dd.io.load(data_path, group='/data_index')
-    # Create datasets
-    test_data = CustomDataset(ids_list)
-    data_iterator = {}
-    # Load datasets
-    data_iterator['testing'] = DataLoader(test_data, batch_size=BATCH_SIZE,
-                                          shuffle=True, num_workers=6)
-
-    return data_iterator
 
 
 def predict(model_path, parameters):
@@ -53,22 +24,16 @@ def predict(model_path, parameters):
         accuracy of classification.
 
     """
-    data_iterator = create_data_iterator(parameters['data_path'],
-                                         parameters['BATCH_SIZE'], parameters['TEST_SIZE'])
-    trained_model = torch.load(model_path)
-    trained_model['model'].eval()
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    data_iterator = create_data_iterator(parameters, predicting=True)
+    trained_model = torch.load(model_path, map_location=device)
+    # trained_model['model'].eval()
+    output = []
     with torch.no_grad():
-        total = 0
-        length = 0
         for x, y in data_iterator:
-            out_put = model(x.to(device))
-            out_put = out_put.cpu().detach()
-            total += (out_put.argmax(dim=1) == y.argmax(dim=1)).float().sum()
-            length += len(y)
-        accuracy = total / length
-    output = trained_model['model'](x_batc)
+            output.append(trained_model(x.to(device)))
 
-    return accuracy
+    return output
 
 
 if __name__ == '__main__':
@@ -77,8 +42,7 @@ if __name__ == '__main__':
     config = yaml.load(open(path))
 
     # Path to data to be tested
-    data_path = Path(__file__).parents[2] / \
-        'data/processed/balanced_torch_dataset.h5'
+    data_path = Path(__file__).parents[2] / config['balanced_torch_dataset']
 
     # Paramters
     parameters = {'OUTPUT': config['OUTPUT'],
@@ -87,8 +51,10 @@ if __name__ == '__main__':
                   'LEARNING_RATE': config['LEARNING_RATE'],
                   'TEST_SIZE': config['TEST_SIZE'],
                   'data_path': str(data_path)}
-
+    read_path = str(Path(__file__).parents[2] / 'models')
+    with open(read_path + '/time.txt', "r+") as f:
+        latest_model = f.readlines()[-1].splitlines()
     model_path = str(
-        Path(__file__).parents[2] / 'models/model_Thu Mar  7 13:02:23 2019.pth')
+        Path(__file__).parents[2] / 'models/model_') + latest_model[0] + '.pth'
     predictions = predict(model_path, parameters)
-    print(accuracy)
+    print(predictions)

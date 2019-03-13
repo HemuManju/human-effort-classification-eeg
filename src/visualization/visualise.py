@@ -25,9 +25,7 @@ def robot_position_plot(subject, trial):
     sub_data = all_data[subject]['robot'][trial]
     n_features = len(sub_data.info['ch_names'])
     data = sub_data.get_data()
-    print(data.shape)
     sub_data = data.transpose(1, 0, 2).reshape(n_features, -1)
-    print(sub_data[0, :].shape)
     # plotting
     plt.plot(sub_data[1, :], sub_data[0, :])  # robot co-ordinates are flipped
     plt.show()
