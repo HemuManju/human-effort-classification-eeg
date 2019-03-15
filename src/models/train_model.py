@@ -1,16 +1,16 @@
 from visdom import Visdom, server
-from utils import *
 import yaml
 import torch
-from networks import ShallowEEGNet
 from torch.utils.data import DataLoader
 import torch.nn as nn
 from pathlib import Path
 from datetime import datetime
 from datasets import CustomDataset
+from .networks import ShallowEEGNet
+from .utils import *
 
 
-def train(network, parameters, new_weights=False):
+def train(network, config, new_weights=False):
     """Main function to run the optimization..
 
     Parameters
@@ -32,22 +32,22 @@ def train(network, parameters, new_weights=False):
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     print('Computation device being used:', device)
 
-    data_iterator = create_data_iterator(parameters)
+    data_iterator = create_data_iterator(config)
 
     # An instance of model
-    model = network(parameters['OUTPUT']).to(device)
+    model = network(config['OUTPUT']).to(device)
     if new_weights:
         model.apply(weights_init)
 
     # Loss and optimizer
     criterion = nn.NLLLoss()
     optimizer = torch.optim.Adam(
-        model.parameters(), lr=parameters['LEARNING_RATE'])
+        model.parameters(), lr=config['LEARNING_RATE'])
 
     # Visual logger
     visual_logger = visual_log('Task type classification')
     accuracy_log = []
-    for epoch in range(parameters['NUM_EPOCHS']):
+    for epoch in range(config['NUM_EPOCHS']):
         for x_batch, y_batch in data_iterator['training']:
             # Send the input and labels to gpu
             x_batch = x_batch.to(device)
@@ -67,8 +67,7 @@ def train(network, parameters, new_weights=False):
         visual_logger.log(epoch, [accuracy[0], accuracy[1], accuracy[2]])
 
     # Add loss function info to parameter.
-    parameters['loss_function'] = str(criterion)
-    model_info = create_model_info(parameters, np.array(accuracy_log))
+    model_info = create_model_info(config, str(criterion), np.array(accuracy_log))
 
     return model, model_info
 

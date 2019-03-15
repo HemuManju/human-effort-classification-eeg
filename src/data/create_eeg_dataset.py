@@ -1,7 +1,7 @@
-from eeg_utils import *
 import deepdish as dd
 import yaml
 import collections
+from .eeg_utils import *
 
 
 def create_dataset(subjects, trials):
@@ -24,18 +24,4 @@ def create_dataset(subjects, trials):
             data['eeg'][trial] = create_eeg_epochs(subject, trial)
         eeg_dataset[subject] = data
 
-    return eeg_dataset
-
-
-if __name__ == '__main__':
-    path = Path(__file__).parents[1] / 'config.yml'
-    config = yaml.load(open(path))
-    subjects = config['subjects']
-    trials = config['trials']
-    # Main file
-    eeg_dataset = create_dataset(subjects, trials)
-    save = True  # Save the file
-    if save:
-        save_path = Path(__file__).parents[2] / \
-            'data/interim/raw_eeg_exp_2_dataset.h5'
-        dd.io.save(save_path, eeg_dataset)
+    return eeg_dataset    

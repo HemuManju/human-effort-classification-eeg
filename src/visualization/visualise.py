@@ -6,10 +6,10 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sb
+import os, sys
 
-
-def robot_position_plot(subject, trial):
-    """Short summary.
+def plot_robot_position(subject, trial):
+    """Plots the robot end effector position (only x and y are plotted).
 
     Parameters
     ----------
@@ -22,10 +22,9 @@ def robot_position_plot(subject, trial):
     # Read the data from processed data folder
     path = str(Path(__file__).parents[2] / config['raw_robot_dataset'])
     all_data = dd.io.load(path)
-    sub_data = all_data[subject]['robot'][trial]
-    n_features = len(sub_data.info['ch_names'])
-    data = sub_data.get_data()
-    sub_data = data.transpose(1, 0, 2).reshape(n_features, -1)
+    temp_data = all_data[subject]['robot'][trial]
+    n_features = len(temp_data.info['ch_names'])
+    sub_data = temp_data.get_data().transpose(1, 0, 2).reshape(n_features, -1)
     # plotting
     plt.plot(sub_data[1, :], sub_data[0, :])  # robot co-ordinates are flipped
     plt.show()
@@ -73,5 +72,5 @@ if __name__ == '__main__':
     model_path = path + '/model_' + time_stamp + '.pth'
     model_info_path = path + '/model_info_' + time_stamp + '.pth'
 
-    robot_position_plot(subjects[0], trials[0])
+    plot_robot_position(subjects[0], trials[0])
     # plot_model_accuracy(model_info_path)

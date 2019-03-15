@@ -42,15 +42,3 @@ def create_balanced_dataset(data_path):
     balanced_dataset['data_index'] = np.arange(ids_list.shape[0])
 
     return balanced_dataset
-
-
-if __name__ == '__main__':
-    data_path = str(Path(__file__).parents[2] /
-                    'data/processed/torch_dataset.h5')
-    # Main file
-    balanced_dataset = create_balanced_dataset(data_path)
-    save = True  # Save the file
-    if save:
-        save_path = str(Path(__file__).parents[2] /
-                        'data/processed/balanced_torch_dataset.h5')
-        dd.io.save(save_path, balanced_dataset)

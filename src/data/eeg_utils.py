@@ -9,7 +9,7 @@ from scipy import signal
 from scipy.signal import resample
 from datetime import datetime
 from autoreject import Ransac, AutoReject
-from mne.time_frequency import tfr_stockwell, psd_array_welch, psd_welch, psd_multitaper
+from mne.time_frequency import psd_multitaper
 from autoreject import get_rejection_threshold
 import yaml
 import deepdish as dd
@@ -139,9 +139,8 @@ def get_eeg_data(subject):
     eeg_path = get_eeg_path(subject)
     eeg_time = get_eeg_time(subject)
     # EEG info
-    info = mne.create_info(ch_names=['Fp1', 'F7', 'F8', 'T4', 'T6', 'T5', 'T3', 'Fp2', 'O1',
-                                     'P3', 'Pz', 'F3', 'Fz', 'F4', 'C4', 'P4', 'POz', 'C3', 'Cz', 'O2',
-                                     'STI 014'],
+    info = mne.create_info(ch_names=['Fp1', 'F7', 'F8', 'T4', 'T6', 'T5', 'T3','Fp2', 'O1', 'P3', 'Pz', 'F3', 'Fz', 'F4',
+    'C4', 'P4', 'POz', 'C3', 'Cz', 'O2','STI 014'],
                            ch_types=['eeg'] * 20 + ['stim'],
                            sfreq=256.0,
                            montage="standard_1020")

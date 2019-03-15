@@ -5,10 +5,11 @@ import numpy as np
 import torch
 import time
 from torchnet.logger import VisdomPlotLogger
-from datasets import CollectiveDataset, SubjectSpecificDataset
 from torch.utils.data import DataLoader
 from pathlib import Path
 import yaml
+from .datasets import CollectiveDataset, SubjectSpecificDataset
+
 
 path = Path(__file__).parents[1] / 'config.yml'
 config = yaml.load(open(path))
@@ -245,7 +246,7 @@ def visual_log(title):
     return visual_logger
 
 
-def create_model_info(param, accuracy):
+def create_model_info(config, loss_func, accuracy):
     """Create a dictionary of relevant model info.
 
     Parameters
@@ -264,6 +265,7 @@ def create_model_info(param, accuracy):
     model_info = {'training_accuracy': accuracy[:, 0],
                   'validation_accuracy': accuracy[:, 1],
                   'testing_accuracy': accuracy[:, 2],
-                  'model_parameters': param}
+                  'model_parameters': config,
+                  'loss function': loss_func}
 
     return model_info

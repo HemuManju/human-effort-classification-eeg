@@ -1,8 +1,8 @@
-from eeg_utils import *
 import deepdish as dd
 from autoreject import get_rejection_threshold
 import yaml
 import collections
+from .eeg_utils import *
 
 
 def autoreject_repair_epochs(epochs, reject_plot=False):
@@ -121,17 +121,3 @@ def clean_dataset(subject, trial):
         clean_eeg_dataset[subject] = data
 
     return clean_eeg_dataset
-
-
-if __name__ == '__main__':
-    path = Path(__file__).parents[1] / 'config.yml'
-    config = yaml.load(open(path))
-    subjects = config['subjects']
-    trials = config['trials']
-    # Main file
-    clean_dataset = clean_dataset(subjects, trials)
-    save = True  # Save the file
-    if save:
-        save_path = Path(__file__).parents[2] / \
-            'data/interim/clean_eeg_exp_2_dataset.h5'
-        dd.io.save(save_path, clean_dataset)

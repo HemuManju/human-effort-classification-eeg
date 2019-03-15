@@ -65,7 +65,7 @@ def convert_to_array(subject, trial):
     return x_array, y_array
 
 
-def create_torch_dataset(subjects, trials):
+def create_torch_dataset(subjects, trials, config):
     """Create pytorch dataset for all subjects.
 
     Parameters
@@ -83,8 +83,8 @@ def create_torch_dataset(subjects, trials):
     """
     # Initialize the numpy array
     torch_dataset = {}
-    x_temp = np.empty((0, n_electrodes, epoch_length * s_freq))
-    y_temp = np.empty((0, n_class))
+    x_temp = np.empty((0, config['n_electrodes'], config['epoch_length'] * config['s_freq']))
+    y_temp = np.empty((0, config['n_class']))
 
     for subject in subjects:
         for trial in trials:
@@ -96,21 +96,3 @@ def create_torch_dataset(subjects, trials):
     torch_dataset['data_index'] = np.arange(y_temp.shape[0])
 
     return torch_dataset
-
-
-if __name__ == '__main__':
-    path = Path(__file__).parents[1] / 'config.yml'
-    config = yaml.load(open(path))
-    subjects = config['subjects']
-    trials = config['trials']
-    s_freq = config['s_freq']
-    epoch_length = config['epoch_length']
-    n_electrodes = config['n_electrodes']
-    n_class = config['n_class']
-
-    # Main file
-    torch_dataset = create_torch_dataset(subjects, trials)
-    save = True  # Save the file
-    if save:
-        save_path = str(Path(__file__).parents[2] / config['torch_dataset'])
-        dd.io.save(save_path, torch_dataset)
