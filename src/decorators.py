@@ -16,4 +16,4 @@ class skip(object):
         self.f = f
 
     def __call__(self, *args):
-        print('skipping the function: ' + self.f.__name__)
+        print('skipping : ' + self.f.__name__)
