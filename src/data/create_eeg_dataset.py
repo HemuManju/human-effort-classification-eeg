@@ -4,7 +4,7 @@ import collections
 from .eeg_utils import *
 
 
-def create_dataset(subjects, trials):
+def eeg_dataset(subjects, trials):
     """Create the data with each subject data in a dictionary.
 
     Parameter
@@ -24,4 +24,4 @@ def create_dataset(subjects, trials):
             data['eeg'][trial] = create_eeg_epochs(subject, trial)
         eeg_dataset[subject] = data
 
-    return eeg_dataset    
+    return eeg_dataset

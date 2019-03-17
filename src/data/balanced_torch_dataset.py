@@ -6,7 +6,7 @@ import deepdish as dd
 import numpy as np
 
 
-def create_balanced_dataset(data_path):
+def balanced_torch_dataset(data_path):
     """Create balanced pytorch dataset for all subjects.
 
     Parameters

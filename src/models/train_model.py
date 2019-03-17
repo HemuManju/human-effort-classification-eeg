@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 import torch.nn as nn
 from pathlib import Path
 from datetime import datetime
-from datasets import CustomDataset
+from .datasets import CollectiveDataset
 from .networks import ShallowEEGNet
 from .utils import *
 

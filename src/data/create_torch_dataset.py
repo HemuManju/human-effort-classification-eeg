@@ -65,7 +65,7 @@ def convert_to_array(subject, trial):
     return x_array, y_array
 
 
-def create_torch_dataset(subjects, trials, config):
+def torch_dataset(subjects, trials, config):
     """Create pytorch dataset for all subjects.
 
     Parameters

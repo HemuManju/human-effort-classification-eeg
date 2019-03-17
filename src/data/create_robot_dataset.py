@@ -5,7 +5,7 @@ import collections
 from .robot_utils import *
 
 
-def create_dataset(subjects, trials):
+def robot_dataset(subjects, trials):
     """Create the data with each subject data in a dictionary.
 
     Parameter
