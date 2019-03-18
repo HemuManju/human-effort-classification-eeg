@@ -17,6 +17,7 @@ from decorators import skip_run_code
 
 config = yaml.load(open('config.yml'))
 
+
 def get_model_path():
     path = str(Path(__file__).parents[1] / 'models')
     with open(path + '/time.txt', "r+") as f:
@@ -28,27 +29,27 @@ def get_model_path():
     return model_path, model_info_path
 
 
-def save_dataset(path, dataset, save=False):
+def save_dataset(path, dataset, save):
     if save:
-        dd.io.save(save_path, clean_dataset)
+        dd.io.save(path, dataset)
 
 
 with skip_run_code('skip', 'create_eeg_dataset') as check, check():
-    eeg_dataset = create_dataset(config['subjects'], config['trials'])
+    eeg_dataset = eeg_dataset(config['subjects'], config['trials'])
     save_path = Path(__file__).parents[2] / config['raw_eeg_dataset']
-    save_dataset(save_path, eeg_dataset)
+    save_dataset(save_path, eeg_dataset, save=True)
 
 
 with skip_run_code('skip', 'create_robot_dataset') as check, check():
-    robot_dataset = create_dataset(config['subjects'], config['trials'])
+    robot_dataset = robot_dataset(config['subjects'], config['trials'])
     save_path = Path(__file__).parents[2] / config['raw_robot_dataset']
-    save_dataset(save_path, robot_dataset)
+    save_dataset(save_path, robot_dataset, save=False)
 
 
 with skip_run_code('skip', 'clean_eeg_dataset') as check, check():
     clean_dataset = clean_dataset(configp['subjects'], config['trials'])
     save_path = Path(__file__).parents[2] / config['clean_eeg_dataset']
-    save_dataset(save_path, clean_dataset)
+    save_dataset(save_path, clean_dataset, save=False)
 
 
 with skip_run_code('skip', 'torch_dataset') as check, check():
@@ -60,12 +61,14 @@ with skip_run_code('skip', 'torch_dataset') as check, check():
 with skip_run_code('skip', 'balanced_torch_dataset') as check, check():
     data_path = str(Path(__file__).parents[2] / config['torch_dataset'])
     balanced_dataset = create_balanced_dataset(data_path)
-    save_path = str(Path(__file__).parents[2] / config['balanced_torch_dataset'])
-    save_dataset(save_path, balanced_torch_dataset)
+    save_path = str(
+        Path(__file__).parents[2] / config['balanced_torch_dataset'])
+    save_dataset(save_path, balanced_torch_dataset, save=False)
 
 
 with skip_run_code('skip', 'traning') as check, check():
-    data_path = Path(__file__).parents[1] / 'data/processed/balanced_torch_dataset.h5'
+    data_path = Path(__file__).parents[1] / \
+        'data/processed/balanced_torch_dataset.h5'
     config['data_path'] = str(data_path)
     trained_model, trained_model_info = train(ShallowEEGNet, config)
     save = True
@@ -89,17 +92,11 @@ with skip_run_code('skip', 'prediction') as check, check():
         Path(__file__).parents[1] / 'models/model_') + latest_model + '.pth'
     # Predictions
     predicted_labels = predict(model_path, config)
-    print(predicted_labels.shape)
 
 
-with skip_run_code('run', 'prediction_plot') as check, check():
-    read_path = str(Path(__file__).parents[1] / 'models')
-    with open(read_path + '/time.txt', "r+") as f:
-        latest_model = f.readlines()[-1].splitlines()[0]
-    model_path = str(
-        Path(__file__).parents[1] / 'models/model_') + latest_model + '.pth'
-    # Predictions
-    # predicted_labels = predict(model_path, config)
-    sb.set()
-    plot_robot_position(config['subjects'][1], config['trials'][2], config)
-    # plot trajectory along with predicted labels
+with skip_run_code('skip', 'prediction_plot') as check, check():
+    subject = config['subjects'][0]
+    trial = config['trials'][0]
+    prediction = predicted_labels[subject][trial]
+    plot_predictions(subject, trial, config,
+                     predictions=predictions[subject][trial])

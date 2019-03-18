@@ -83,7 +83,8 @@ def torch_dataset(subjects, trials, config):
     """
     # Initialize the numpy array
     torch_dataset = {}
-    x_temp = np.empty((0, config['n_electrodes'], config['epoch_length'] * config['s_freq']))
+    x_temp = np.empty((0, config['n_electrodes'],
+                       config['epoch_length'] * config['s_freq']))
     y_temp = np.empty((0, config['n_class']))
 
     for subject in subjects:
@@ -133,4 +134,4 @@ def balanced_torch_dataset(data_path):
     balanced_dataset['labels'] = labels[ids_list, :]
     balanced_dataset['data_index'] = np.arange(ids_list.shape[0])
 
-    return balanced_dataset
+    return balanced_datasetSS

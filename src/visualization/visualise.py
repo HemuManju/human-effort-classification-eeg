@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import seaborn as sb
 import pickle
 
+
 def plot_robot_position(subject, trial, config):
     """Plots the robot end effector position (only x and y are plotted).
 
@@ -28,7 +29,6 @@ def plot_robot_position(subject, trial, config):
     sub_data = temp_data.get_data().transpose(1, 0, 2).reshape(n_features, -1)
     # plotting
     plt.plot(sub_data[1, :], sub_data[0, :])  # robot co-ordinates are flipped
-    plt.show()
 
     return None
 
@@ -78,21 +78,24 @@ def plot_predictions(subject, trial, config, predictions):
     path = str(Path(__file__).parents[2] / config['raw_robot_dataset'])
     all_data = dd.io.load(path)
     temp_data = all_data[subject]['robot'][trial]
-    sub_data = temp_data.get_data()[:, :, 128] # Select only middle point of the epoch
-    x, y = sub_data[:,1], sub_data[:,0]
-    if len(x)!=len(predictions): # check is number of predictions matach x or y data
+    # Select only middle point of the epoch
+    sub_data = temp_data.get_data()[:, :, 128]
+    x, y = sub_data[:, 1], sub_data[:, 0]
+    if len(x) != len(predictions):  # check is number of predictions matach x or y data
         raise Exception('Two epochs are not of same length!')
     # Find three classes
-    idx_up = np.where(predictions==0)
-    idx_down = np.where(predictions==1)
-    idx_O = np.where(predictions==2)
-    plt.scatter(x[idx_up], y[idx_up], marker='v')
+    idx_up = np.where(predictions == 0)
+    idx_down = np.where(predictions == 1)
+    idx_O = np.where(predictions == 2)
+    # sb.set()
+    plt.scatter(x[idx_up], y[idx_up], marker='^')
     plt.scatter(x[idx_O], y[idx_O], marker='o')
-    plt.scatter(x[idx_down], y[idx_down], marker='^')
-    plt.legend(['Decrease', 'Hold', 'Increase'])
-    plt.xlabel('x')
-    plt.xlabel('y')
-    plt.show()
+    plt.scatter(x[idx_down], y[idx_down], marker='v')
+    # plt.legend(['Increase', 'Hold', 'Decrease'])
+    # plt.xlabel('x')
+    plt.tick_params(labelright=False, top=False,
+                    labelleft=False, labelbottom=False)
+    # plt.ylabel('y')
 
     return None
 
@@ -100,13 +103,23 @@ def plot_predictions(subject, trial, config, predictions):
 if __name__ == '__main__':
     # Parameters
     config = yaml.load(open(str(Path(__file__).parents[1]) + '/config.yml'))
-    subject = config['subjects'][0]
-    trial = config['trials'][0]
-    print(trial)
+    subject = config['subjects']
+    trial = config['trials']
     with open('predictions.pkl', 'rb') as f:
         predictions = pickle.load(f)
 
-    print(predictions[subject][trial])
-
-    plot_predictions(subject, trial, config, predictions=predictions[subject][trial])
+    count = 1
+    for i, subject in enumerate(config['subjects']):
+        for j, trial in enumerate(config['trials']):
+            plt.subplot(9, 3, count)
+            plot_predictions(subject, trial, config,
+                             predictions=predictions[subject][trial])
+            count = count + 1
+    # count = 1
+    # for i, subject in enumerate(config['subjects']):
+    #     for j, trial in enumerate(config['trials']):
+    #         plt.subplot(9, 3, count)
+    #         plot_robot_position(subject, trial, config)
+    #         count = count + 1
+    plt.show()
     # plot_model_accuracy(model_info_path)
