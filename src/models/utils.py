@@ -60,7 +60,7 @@ def data_iterator_ids(path, test_size=0.15):
     return ids_list
 
 
-def collective_data_iterator(parameters, predicting=False):
+def collective_data_iterator(config, predicting=False):
     """Create data iterators.
 
     Parameters
@@ -77,9 +77,9 @@ def collective_data_iterator(parameters, predicting=False):
 
     """
     data_iterator = {}
-    data_path = parameters['data_path']
-    BATCH_SIZE = parameters['BATCH_SIZE']
-    TEST_SIZE = parameters['TEST_SIZE']
+    data_path = config['data_path']
+    BATCH_SIZE = config['BATCH_SIZE']
+    TEST_SIZE = config['TEST_SIZE']
     if predicting:
         ids_list = dd.io.load(data_path, group='/data_index')
         # Create datasets

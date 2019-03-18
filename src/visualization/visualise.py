@@ -2,13 +2,11 @@ import yaml
 import torch
 import deepdish as dd
 from pathlib import Path
-import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sb
-import os, sys
 
-def plot_robot_position(subject, trial):
+def plot_robot_position(subject, trial, config):
     """Plots the robot end effector position (only x and y are plotted).
 
     Parameters
@@ -16,7 +14,9 @@ def plot_robot_position(subject, trial):
     subject : string
         subject ID e.g. 7707.
     trial : string
-        trial e.g. HighFine.
+        trial e.g. HighFine, AdaptFine.
+    config: yaml file
+        configuration file with all parameters
 
     """
     # Read the data from processed data folder
@@ -60,17 +60,48 @@ def plot_model_accuracy(model_path):
     return None
 
 
+def plot_predictions(subject, trial, config, predictions):
+    """A function to plot trajectory and predictions along the path.
+
+    Parameters
+    ----------
+    subject : string
+        subject ID e.g. 7707.
+    trial : string
+        trial e.g. HighFine, AdaptFine.
+    predictions : numpy array
+        A numpy array of (m x 1) of predictions at required points.
+
+    """
+    # Co-ordinates
+    path = str(Path(__file__).parents[2] / config['raw_robot_dataset'])
+    all_data = dd.io.load(path)
+    temp_data = all_data[subject]['robot'][trial]
+    sub_data = temp_data.get_data()[:, :, 128] # Select only middle point of the epoch
+    x, y = sub_data[:,1], sub_data[:,0]
+    if len(x)!=len(predictions): # check is number of predictions matach x or y data
+        raise Exception('Two epochs are not of same length!')
+    # Find three classes
+    idx_up = np.where(predictions==0)
+    idx_down = np.where(predictions==1)
+    idx_O = np.where(predictions==2)
+    plt.scatter(x[idx_up], y[idx_up], marker='^')
+    plt.scatter(x[idx_O], y[idx_O], marker='o')
+    plt.scatter(x[idx_down], y[idx_down], marker='v')
+    plt.legend()
+    plt.xlabel('x')
+    plt.xlabel('y')
+    plt.show()
+
+    return None
+
+
+
 if __name__ == '__main__':
     # Parameters
     config = yaml.load(open(str(Path(__file__).parents[1]) + '/config.yml'))
     subjects = config['subjects']
     trials = config['trials']
-    path = str(Path(__file__).parents[2] / 'models')
-    with open(path + '/time.txt', "r+") as f:
-        time_stamp = f.readlines()
-    time_stamp = time_stamp[-1][0:-1]
-    model_path = path + '/model_' + time_stamp + '.pth'
-    model_info_path = path + '/model_info_' + time_stamp + '.pth'
 
-    plot_robot_position(subjects[0], trials[0])
+    plot_predictions(subjects[0], trials[0], config, predictions=[0, 1])
     # plot_model_accuracy(model_info_path)

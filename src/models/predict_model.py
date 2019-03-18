@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 from pathlib import Path
 
 
-def predict(trained_model_path, parameters, subject_specific=False):
+def predict(trained_model_path, config, subject_specific=False):
     """Predict.
 
     Parameters
@@ -25,8 +25,8 @@ def predict(trained_model_path, parameters, subject_specific=False):
     """
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     trained_model = torch.load(trained_model_path, map_location=device)
-    for subject in parameters['subjects']:
-        for trial in parameters['trials']:
+    for subject in config['subjects']:
+        for trial in config['trials']:
             data_iterator = subject_specific_data_iterator(subject, trial)
             labels = calculate_predictions(
                 trained_model, data_iterator, parameters)

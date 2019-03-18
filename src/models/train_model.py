@@ -32,7 +32,7 @@ def train(network, config, new_weights=False):
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     print('Computation device being used:', device)
 
-    data_iterator = create_data_iterator(config)
+    data_iterator = collective_data_iterator(config)
 
     # An instance of model
     model = network(config['OUTPUT']).to(device)

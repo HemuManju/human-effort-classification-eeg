@@ -8,12 +8,11 @@ from datetime import datetime
 import yaml
 from math import pi
 from itertools import product
-from eeg_utils import get_trial_path, read_eeg_epochs
 import pybullet as pb
 import pybullet_data
 from mne.parallel import parallel_func
 import deepdish as dd
-
+from .eeg_utils import get_trial_path, read_eeg_epochs
 
 # Import configuration
 path = Path(__file__).parents[1] / 'config.yml'

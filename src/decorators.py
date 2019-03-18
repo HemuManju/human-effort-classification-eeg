@@ -44,11 +44,12 @@ def skip_run_code(flag, f):
     def check_active():
         deactivated = ['skip']
         if flag in deactivated:
+            print('Skipping the code: ' + f)
             raise SkipWith()
         else:
+            print('Running the code: ' + f)
             yield
     try:
         yield check_active
-        print('Running the code: ' + f)
     except SkipWith:
-        print('Skipping the code: ' + f)
+        pass
