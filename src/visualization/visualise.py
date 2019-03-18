@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sb
+import pickle
 
 def plot_robot_position(subject, trial, config):
     """Plots the robot end effector position (only x and y are plotted).
@@ -85,10 +86,10 @@ def plot_predictions(subject, trial, config, predictions):
     idx_up = np.where(predictions==0)
     idx_down = np.where(predictions==1)
     idx_O = np.where(predictions==2)
-    plt.scatter(x[idx_up], y[idx_up], marker='^')
+    plt.scatter(x[idx_up], y[idx_up], marker='v')
     plt.scatter(x[idx_O], y[idx_O], marker='o')
-    plt.scatter(x[idx_down], y[idx_down], marker='v')
-    plt.legend()
+    plt.scatter(x[idx_down], y[idx_down], marker='^')
+    plt.legend(['Decrease', 'Hold', 'Increase'])
     plt.xlabel('x')
     plt.xlabel('y')
     plt.show()
@@ -96,12 +97,16 @@ def plot_predictions(subject, trial, config, predictions):
     return None
 
 
-
 if __name__ == '__main__':
     # Parameters
     config = yaml.load(open(str(Path(__file__).parents[1]) + '/config.yml'))
-    subjects = config['subjects']
-    trials = config['trials']
+    subject = config['subjects'][0]
+    trial = config['trials'][0]
+    print(trial)
+    with open('predictions.pkl', 'rb') as f:
+        predictions = pickle.load(f)
 
-    plot_predictions(subjects[0], trials[0], config, predictions=[0, 1])
+    print(predictions[subject][trial])
+
+    plot_predictions(subject, trial, config, predictions=predictions[subject][trial])
     # plot_model_accuracy(model_info_path)

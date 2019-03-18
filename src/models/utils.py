@@ -8,7 +8,7 @@ from torchnet.logger import VisdomPlotLogger
 from torch.utils.data import DataLoader
 from pathlib import Path
 import yaml
-from .datasets import CollectiveDataset, SubjectSpecificDataset
+from datasets import CollectiveDataset, SubjectSpecificDataset
 
 
 path = Path(__file__).parents[1] / 'config.yml'

@@ -70,34 +70,3 @@ def train(network, config, new_weights=False):
     model_info = create_model_info(config, str(criterion), np.array(accuracy_log))
 
     return model, model_info
-
-
-if __name__ == '__main__':
-    # Parameters
-    path = Path(__file__).parents[1] / 'config.yml'
-    config = yaml.load(open(path))
-
-    # Path to data
-    data_path = Path(__file__).parents[2] / \
-        'data/processed/balanced_torch_dataset.h5'
-
-    # Network parameters
-    parameters = {'OUTPUT': config['OUTPUT'],
-                  'NUM_EPOCHS': config['NUM_EPOCHS'],
-                  'BATCH_SIZE': config['BATCH_SIZE'],
-                  'LEARNING_RATE': config['LEARNING_RATE'],
-                  'TEST_SIZE': config['TEST_SIZE'],
-                  'data_path': str(data_path)}
-
-    trained_model, trained_model_info = train(ShallowEEGNet, parameters)
-    save = True
-    save_path = str(Path(__file__).parents[2] / 'models')
-    if save:
-        time_stamp = datetime.now().strftime("%Y_%b_%d_%H_%M_%S")
-        torch.save(trained_model, save_path +
-                   '/model_' + time_stamp + '.pth')
-        torch.save(trained_model_info, save_path +
-                   '/model_info_' + time_stamp + '.pth')
-        # Save time also
-        with open(save_path + '/time.txt', "a") as f:
-            f.write(time_stamp + '\n')
