@@ -8,11 +8,7 @@ from torchnet.logger import VisdomPlotLogger
 from torch.utils.data import DataLoader
 from pathlib import Path
 import yaml
-from datasets import CollectiveDataset, SubjectSpecificDataset
-
-
-path = Path(__file__).parents[1] / 'config.yml'
-config = yaml.load(open(path))
+from .datasets import CollectiveDataset, SubjectSpecificDataset
 
 
 def weights_init(model):
@@ -105,7 +101,7 @@ def collective_data_iterator(config, predicting=False):
     return data_iterator
 
 
-def subject_specific_data_iterator(subject, trial):
+def subject_specific_data_iterator(subject, trial, config):
     """A subject specific data iterator.
 
     Parameters

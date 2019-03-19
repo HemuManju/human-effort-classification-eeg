@@ -82,12 +82,13 @@ def plot_predictions(subject, trial, config, predictions):
     sub_data = temp_data.get_data()[:, :, 128]
     x, y = sub_data[:, 1], sub_data[:, 0]
     if len(x) != len(predictions):  # check is number of predictions matach x or y data
+        print(len(x), len(predictions))
         raise Exception('Two epochs are not of same length!')
     # Find three classes
     idx_up = np.where(predictions == 0)
     idx_down = np.where(predictions == 1)
     idx_O = np.where(predictions == 2)
-    # sb.set()
+    sb.set()
     plt.scatter(x[idx_up], y[idx_up], marker='^')
     plt.scatter(x[idx_O], y[idx_O], marker='o')
     plt.scatter(x[idx_down], y[idx_down], marker='v')
@@ -98,28 +99,3 @@ def plot_predictions(subject, trial, config, predictions):
     # plt.ylabel('y')
 
     return None
-
-
-if __name__ == '__main__':
-    # Parameters
-    config = yaml.load(open(str(Path(__file__).parents[1]) + '/config.yml'))
-    subject = config['subjects']
-    trial = config['trials']
-    with open('predictions.pkl', 'rb') as f:
-        predictions = pickle.load(f)
-
-    count = 1
-    for i, subject in enumerate(config['subjects']):
-        for j, trial in enumerate(config['trials']):
-            plt.subplot(9, 3, count)
-            plot_predictions(subject, trial, config,
-                             predictions=predictions[subject][trial])
-            count = count + 1
-    # count = 1
-    # for i, subject in enumerate(config['subjects']):
-    #     for j, trial in enumerate(config['trials']):
-    #         plt.subplot(9, 3, count)
-    #         plot_robot_position(subject, trial, config)
-    #         count = count + 1
-    plt.show()
-    # plot_model_accuracy(model_info_path)

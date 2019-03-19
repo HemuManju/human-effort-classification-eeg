@@ -12,7 +12,7 @@ import pybullet as pb
 import pybullet_data
 from mne.parallel import parallel_func
 import deepdish as dd
-from eeg_utils import get_trial_path, read_eeg_epochs
+from .eeg_utils import get_trial_path, read_eeg_epochs
 
 # Import configuration
 path = Path(__file__).parents[1] / 'config.yml'
@@ -206,11 +206,3 @@ def create_robot_epochs(subject, trial):
         epochs.drop(drop_id)
 
     return epochs
-#
-#
-# config = yaml.load(open(str(Path(__file__).parents[1]) + '/config.yml'))
-# subjects = config['subjects']
-# trials = config['trials']
-# for subject in subjects:
-#     for trial in trials:
-#         append_xyz(subject, trial)

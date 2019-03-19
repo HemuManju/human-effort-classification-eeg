@@ -2,7 +2,7 @@ import deepdish as dd
 from pathlib import Path
 import yaml
 import collections
-from robot_utils import *
+from .robot_utils import *
 
 
 def robot_dataset(subjects, trials):
@@ -26,13 +26,3 @@ def robot_dataset(subjects, trials):
         robot_dataset[subject] = data
 
     return robot_dataset
-
-
-def save_dataset(path, dataset, save):
-    if save:
-        dd.io.save(path, dataset)
-
-
-robot_dataset = robot_dataset(config['subjects'], config['trials'])
-save_path = Path(__file__).parents[2] / config['raw_robot_dataset']
-save_dataset(save_path, robot_dataset, save=True)

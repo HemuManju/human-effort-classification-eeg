@@ -1,24 +1,33 @@
 # These are the parameters used
 epoch_length:  1
 image_size:    32
-# subjects:    ['7707', '7708', '8801', '8802','8803', '8815', '8819', '8820','8821','8822', '8823', '8824', '8826',8828', '8830', '8831', '8832', '8833']
-subjects:      ['8801', '8802', '8803', '8821','8823', '8830', '8831', '8832', '8833']
-# trials:      ['HighFine', 'HighGross', 'LowFine', 'LowGross']
-trials:        ['AdaptComb', 'HighComb', 'LowComb']
+subjects:    ['7707', '7708', '8801', '8802','8803', '8815', '8819', '8820','8821','8822', '8823', '8824', '8826', '8828', '8830', '8831', '8832', '8833']
+# subjects:      ['8801', '8802', '8803', '8821','8823', '8830', '8831', '8832', '8833']
+trials:      ['HighFine', 'HighGross', 'LowFine', 'LowGross']
+# trials:        ['AdaptComb', 'HighComb', 'LowComb']
 freq_bands:    [[4, 7], [8, 10], [11, 13], [14, 22], [23, 35], [35, 45]]
 n_freqs:       6
 n_electrodes:  20
 s_freq:        256
 n_class:       3
 
-# Paths
+# Original experiment Paths
 raw_eeg_path : 'data/raw/experiment_2/eeg_data/'
-raw_eeg_dataset : 'data/interim/raw_eeg_exp_2_dataset.h5'
-clean_eeg_dataset : 'data/interim/clean_eeg_exp_2_dataset.h5'
-raw_robot_path : 'data/raw/experiment_2/force_data/'
-raw_robot_dataset : 'data/interim/robot_exp_2_dataset.h5'
-torch_dataset : 'data/processed/torch_exp_2_dataset.h5'
+raw_robot_path : 'data/raw/force_data/'
+raw_eeg_dataset : 'data/interim/raw_eeg_dataset.h5'
+clean_eeg_dataset : 'data/interim/clean_eeg_dataset.h5'
+raw_robot_dataset : 'data/interim/raw_robot_dataset.h5'
+torch_dataset : 'data/processed/torch_dataset.h5'
 balanced_torch_dataset : 'data/processed/balanced_torch_dataset.h5'
+
+# # Set 2 experiments Paths
+# raw_eeg_path : 'data/raw/experiment_2/eeg_data/'
+# raw_robot_path : 'data/raw/experiment_2/force_data/'
+# raw_eeg_dataset : 'data/interim/raw_eeg_exp_2_dataset.h5'
+# clean_eeg_dataset : 'data/interim/clean_eeg_exp_2_dataset.h5'
+# raw_robot_dataset : 'data/interim/robot_exp_2_dataset.h5'
+# torch_dataset : 'data/processed/torch_exp_exp_2_dataset.h5'
+# balanced_torch_dataset : 'data/processed/balanced_torch_dataset.h5'
 
 # Neural network parameters
 OUTPUT:        3
