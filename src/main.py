@@ -5,6 +5,7 @@ from pathlib import Path
 import seaborn as sb
 import torch
 import numpy as np
+from sklearn.preprocessing import normalize
 from scipy.stats import mode
 import matplotlib.pyplot as plt
 from datetime import datetime
@@ -13,11 +14,12 @@ from data.create_robot_dataset import robot_dataset
 from data.clean_eeg_dataset import clean_dataset
 from data.create_torch_dataset import torch_dataset
 from data.create_torch_dataset import balanced_torch_dataset
+from features.instability import instability_index
 from models.train_model import train
 from models.networks import ShallowEEGNet
 from models.predict_model import predict_all_task, predict_subject_task_specific
 from visualization.visualise import plot_model_accuracy, plot_robot_position
-from visualization.visualise import plot_predictions
+from visualization.visualise import plot_predictions, plot_predictions_with_instability
 from decorators import skip_run_code
 
 config = yaml.load(open('config.yml'))
@@ -89,7 +91,7 @@ with skip_run_code('skip', 'traning') as check, check():
             f.write(time_stamp + '\n')
 
 
-with skip_run_code('skip', 'all_prediction') as check, check():
+with skip_run_code('run', 'all_prediction') as check, check():
     read_path = str(Path(__file__).parents[1] / 'models')
     count = 1
     for subject in config['subjects']:
@@ -103,41 +105,22 @@ with skip_run_code('skip', 'all_prediction') as check, check():
                 trained_model_path = str(
                     Path(__file__).parents[1] / 'models/model_') + trained_model.splitlines()[0] + '.pth'
                 # Predictions
-                predicted_labels = predict_subject_task_specific(trained_model_path, subject, trial)
+                predicted_labels = predict_subject_task_specific(trained_model_path, subject, trial, config)
                 # voting system
                 all_labels.append(predicted_labels)
             all_labels = np.array(all_labels)
             vote, _ = mode(all_labels, axis=0)
-            plot_predictions(subject, trial, config, vote[0])
+            ins_index = instability_index(subject, trial, config)
+            normalised_ins_index = normalize(ins_index[:, np.newaxis], axis=0).ravel()
+            plot_predictions_with_instability(subject, trial, config, vote[0], normalised_ins_index)
+            # plot_predictions(subject, trial, config, vote[0])
             count = count +1
     plt.show()
 
 
-with skip_run_code('skip', 'subject_prediction') as check, check():
-    read_path = str(Path(__file__).parents[1] / 'models')
+with skip_run_code('skip', 'subject_task_specific_prediction') as check, check():
     subject = config['subjects'][0]
     trial = config['trials'][0]
-    # print(subject, trial)
-    with open(read_path + '/time.txt', "r+") as f:
-        trained_models = f.readlines()
-    # Voting
-    all_labels = []
-    for trained_model in trained_models:
-        trained_model_path = str(
-            Path(__file__).parents[1] / 'models/model_') + trained_model.splitlines()[0] + '.pth'
-        # Predictions
-        predicted_labels = predict_subject_task_specific(trained_model_path, subject, trial)
-        # voting system
-        all_labels.append(predicted_labels)
-    all_labels = np.array(all_labels)
-    vote, _ = mode(all_labels, axis=0)
-    plot_predictions(subject, trial, config, vote[0])
-    plt.show()
-
-
-with skip_run_code('run', 'subject_prediction_original_task') as check, check():
-    subject = config['subjects'][0]
-    trial = config['trials'][2]
     print(subject, trial)
     read_path = str(Path(__file__).parents[1] / 'models')
     with open(read_path + '/time.txt', "r+") as f:
@@ -163,4 +146,29 @@ with skip_run_code('skip', 'prediction_plot') as check, check():
     trial = config['trials'][0]
     predictions = predicted_labels[subject][trial]
     plot_predictions(subject, trial, config, predictions)
+    plt.show()
+
+
+with skip_run_code('skip', 'instability_index') as check, check():
+    subject = config['subjects'][1]
+    trial = config['trials'][0]
+    print(subject, trial)
+    read_path = str(Path(__file__).parents[1] / 'models')
+    with open(read_path + '/time.txt', "r+") as f:
+        trained_models = f.readlines()
+    # Voting
+    all_labels = []
+    for trained_model in trained_models:
+        trained_model_path = str(
+            Path(__file__).parents[1] / 'models/model_') + trained_model.splitlines()[0] + '.pth'
+        # Predictions
+        predicted_labels = predict_subject_task_specific(trained_model_path,
+                                                        subject, trial, config)
+        # voting system
+        all_labels.append(predicted_labels)
+    all_labels = np.array(all_labels)
+    vote, _ = mode(all_labels, axis=0)
+    ins_index = instability_index(subject, trial, config)
+    normalised_ins_index = normalize(ins_index[:, np.newaxis], axis=0).ravel()
+    plot_predictions_with_instability(subject, trial, config, vote[0], normalised_ins_index)
     plt.show()
