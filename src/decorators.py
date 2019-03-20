@@ -1,6 +1,7 @@
 
 from contextlib import contextmanager
 
+
 class skip(object):
     """A decorator to skip function execution.
 
@@ -22,7 +23,8 @@ class skip(object):
         print('skipping : ' + self.f.__name__)
 
 
-class SkipWith(Exception): pass
+class SkipWith(Exception):
+    pass
 
 
 @contextmanager
@@ -44,10 +46,10 @@ def skip_run_code(flag, f):
     def check_active():
         deactivated = ['skip']
         if flag in deactivated:
-            print('Skipping the code: ' + f)
+            print('Skipping the block: ' + f)
             raise SkipWith()
         else:
-            print('Running the code: ' + f)
+            print('Running the block: ' + f)
             yield
     try:
         yield check_active

@@ -33,6 +33,11 @@ def plot_robot_position(subject, trial, config):
     return None
 
 
+def plot_average_model_accuracy(config):
+
+    return None
+
+
 def plot_model_accuracy(model_path):
     """Plot training, validation, and testing acurracy.
 
@@ -50,7 +55,6 @@ def plot_model_accuracy(model_path):
     epochs = np.arange(training_accuracy.shape[0])
 
     # Plotting
-    sb.set()
     plt.plot(epochs, training_accuracy, epochs,
              validation_accuracy, epochs, testing_accuracy)
     plt.xlabel('Epochs')
@@ -89,7 +93,6 @@ def plot_predictions(subject, trial, config, predictions):
     idx_O = np.where(predictions == 2)
 
     # Plotting
-    sb.set()
     plt.scatter(x[idx_up], y[idx_up], marker='^')
     plt.scatter(x[idx_O], y[idx_O], marker='o')
     plt.scatter(x[idx_down], y[idx_down], marker='v')
@@ -102,7 +105,7 @@ def plot_predictions(subject, trial, config, predictions):
     return None
 
 
-def plot_predictions_with_instability(subject, trial, config, predictions, ins_index):
+def plot_predictions_with_instability(subject, trial, config, predictions, ins_index, details):
     """A function to plot trajectory and predictions along the path.
 
     Parameters
@@ -133,14 +136,13 @@ def plot_predictions_with_instability(subject, trial, config, predictions, ins_i
     idx_O = np.where(predictions == 2)
 
     # Plotting
-    sb.set()
-    plt.scatter(x[idx_up], y[idx_up], marker='^', s=ins_index[idx_up]*500)
-    plt.scatter(x[idx_O], y[idx_O], marker='o', s=ins_index[idx_O]*500)
-    plt.scatter(x[idx_down], y[idx_down], marker='v', s=ins_index[idx_down]*500)
-    plt.tick_params(labelright=False, top=False,
-                    labelleft=False, labelbottom=False)
-    # plt.legend(['Increase', 'Hold', 'Decrease'])
-    # plt.xlabel('x')
-    # plt.ylabel('y')
+    plt.scatter(x[idx_up], y[idx_up], marker='^', s=ins_index[idx_up] * 100)
+    plt.scatter(x[idx_O], y[idx_O], marker='o', s=ins_index[idx_O] * 100)
+    plt.scatter(x[idx_down], y[idx_down], marker='v',
+                s=ins_index[idx_down] * 100)
+    if details:
+        plt.legend(['Increase', 'Hold', 'Decrease'])
+        plt.xlabel('x')
+        plt.ylabel('y')
 
     return None

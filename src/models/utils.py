@@ -130,7 +130,7 @@ def subject_specific_data_iterator(subject, trial, config):
     # Create datasets
     test_data = SubjectSpecificDataset(x)
     # Load datasets
-    data_iterator = DataLoader(test_data, batch_size=config['BATCH_SIZE'],
+    data_iterator = DataLoader(test_data, batch_size=x.shape[0],
                                shuffle=False, num_workers=10)
 
     return data_iterator

@@ -28,7 +28,6 @@ class SubjectSpecificDataset(Dataset):
     def __getitem__(self, index):
         # Convert to torch tensors
         x = torch.from_numpy(self.data[index, :, :]).type(torch.float32)
-
         return x
 
     def __len__(self):

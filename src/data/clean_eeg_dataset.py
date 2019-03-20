@@ -93,7 +93,7 @@ def clean_with_ica(epochs, show_ica=False):
     return epochs, ica
 
 
-def clean_dataset(subject, trial):
+def clean_dataset(subjects, trials):
     """Create cleaned dataset (by running autoreject and ICA) with each subject data in a dictionary.
 
     Parameter

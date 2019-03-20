@@ -28,7 +28,7 @@ def one_hot_encode(label_length, category):
     return y
 
 
-def convert_to_array(subject, trial):
+def convert_to_array(subject, trial, config):
     """Converts the edf files in eeg and robot dataset into arrays.
 
     Parameters
@@ -44,6 +44,9 @@ def convert_to_array(subject, trial):
         x and y arrays corresponding to the subject and trial.
 
     """
+    n_electrodes = config['n_electrodes']
+    epoch_length = config['epoch_length']
+    s_freq = config['s_freq']
     eeg_path = str(
         Path(__file__).parents[2] / config['clean_eeg_dataset'])
     data = dd.io.load(eeg_path, group='/' + subject)
@@ -89,7 +92,7 @@ def torch_dataset(subjects, trials, config):
 
     for subject in subjects:
         for trial in trials:
-            x_array, y_array = convert_to_array(subject, trial)
+            x_array, y_array = convert_to_array(subject, trial, config)
             x_temp = np.concatenate((x_temp, x_array), axis=0)
             y_temp = np.concatenate((y_temp, y_array), axis=0)
     torch_dataset['features'] = x_temp
