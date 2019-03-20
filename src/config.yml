@@ -16,6 +16,7 @@ TEST_SIZE:     0.15
 # Experiment 0
 # All subjects are used for training and testing
 subjects: :    ['7707', '7708', '8801', '8802','8803', '8815', '8819', '8820','8821','8822', '8823', '8824', '8826', '8828', '8830', '8831', '8832', '8833']
+test_subjects : []
 trials:        ['HighFine', 'HighGross', 'LowFine', 'LowGross']
 # Path
 raw_eeg_path : 'data/raw/experiment_0/eeg_data/'
@@ -28,9 +29,9 @@ balanced_torch_dataset : 'data/processed/balanced_torch_exp_0_dataset.h5'
 ##---------------------------------------------------------------------##
 # # Experiment 1
 # # A subset of all subjects are are used for training and  rest is used for testing
-# subjects:      ['7708', '8801','8803', '8815', '8819','8821','8822', '8823', '8824', '8826', '8828', '8831', '8832', '8833']
+# subjects:    ['7708', '8801','8803', '8815', '8819','8821','8822', '8823', '8824', '8826', '8828', '8831', '8832', '8833']
 # test_subjects: ['8830', '8802', '7707', '8820']
-# trials:        ['HighFine', 'HighGross', 'LowFine', 'LowGross']
+# trials:      ['HighFine', 'HighGross', 'LowFine', 'LowGross']
 # # Paths
 # raw_eeg_path : 'data/raw/experiment_1/eeg_data/'
 # raw_robot_path : 'data/raw/experiment_1/force_data/'

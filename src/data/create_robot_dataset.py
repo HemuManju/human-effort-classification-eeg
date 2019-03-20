@@ -18,7 +18,7 @@ def robot_dataset(subjects, trials):
     robot_dataset : dataset of all the subjects with different conditions.
 
     """
-    robot_dataset = {}
+    robot_dataset = collections.defaultdict(dict)
     for subject in subjects:
         data = collections.defaultdict(dict)
         for trial in trials:

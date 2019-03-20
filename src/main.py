@@ -22,58 +22,39 @@ from models.predict_model import predict_all_task, predict_subject_task_specific
 from visualization.visualise import plot_model_accuracy, plot_robot_position
 from visualization.visualise import plot_predictions, plot_predictions_with_instability
 from decorators import skip_run_code
+from utils import *
 
 config = yaml.load(open('config.yml'))
 
 
-def get_model_path():
-    path = str(Path(__file__).parents[1] / 'models')
-    with open(path + '/time.txt', "r+") as f:
-        time_stamp = f.readlines()
-    time_stamp = time_stamp[-1][0:-1]
-    model_path = path + '/model_' + time_stamp + '.pth'
-    model_info_path = path + '/model_info_' + time_stamp + '.pth'
-
-    return model_path, model_info_path
-
-
-def save_dataset(path, dataset, save):
-    if save:
-        dd.io.save(path, dataset)
-
-
-with skip_run_code('skip', 'create_eeg_dataset') as check, check():
+with skip_run_code('run', 'create_eeg_dataset') as check, check():
     eeg_dataset = eeg_dataset(config['subjects'], config['trials'])
     save_path = Path(__file__).parents[1] / config['raw_eeg_dataset']
     save_dataset(save_path, eeg_dataset, save=True)
 
 
-with skip_run_code('skip', 'clean_eeg_dataset') as check, check():
+with skip_run_code('run', 'clean_eeg_dataset') as check, check():
     clean_dataset = clean_dataset(config['subjects'], config['trials'])
     save_path = Path(__file__).parents[1] / config['clean_eeg_dataset']
     save_dataset(save_path, clean_dataset, save=True)
 
 
-with skip_run_code('skip', 'create_robot_dataset') as check, check():
+with skip_run_code('run', 'create_robot_dataset') as check, check():
     robot_dataset = robot_dataset(config['subjects'], config['trials'])
     save_path = Path(__file__).parents[1] / config['raw_robot_dataset']
     save_dataset(str(save_path), robot_dataset, save=True)
 
 
-with skip_run_code('skip', 'torch_dataset') as check, check():
-    subjects = config['subjects']
-    trials = config['trials']
-    torch_dataset = torch_dataset(subjects, trials, config)
+with skip_run_code('run', 'torch_dataset') as check, check():
+    torch_dataset = torch_dataset(config['subjects'], config['trials'], config)
     save_path = str(Path(__file__).parents[1] / config['torch_dataset'])
     save_dataset(save_path, torch_dataset, save=True)
 
 
 with skip_run_code('skip', 'balanced_torch_dataset') as check, check():
-    data_path = str(Path(__file__).parents[1] / config['torch_dataset'])
-    balanced_dataset = create_balanced_dataset(data_path)
-    save_path = str(
-        Path(__file__).parents[1] / config['balanced_torch_dataset'])
-    save_dataset(save_path, balanced_torch_dataset, save=False)
+    balanced_dataset = create_balanced_dataset(config)
+    save_path = Path(__file__).parents[1] / config['balanced_torch_dataset']
+    save_dataset(str(save_path), balanced_torch_dataset, save=False)
 
 
 with skip_run_code('skip', 'training') as check, check():
@@ -169,7 +150,7 @@ with skip_run_code('skip', 'plot_prediction') as check, check():
     plt.show()
 
 
-with skip_run_code('run', 'plot_instability_index') as check, check():
+with skip_run_code('skip', 'plot_instability_index') as check, check():
     # name = ['Adaptive damping', 'Low damping', 'High damping']
     for i in range(len(config['trials'])):
         sb.set()
