@@ -18,30 +18,30 @@ TEST_SIZE:     0.15
 subjects: :    ['7707', '7708', '8801', '8802','8803', '8815', '8819', '8820','8821','8822', '8823', '8824', '8826', '8828', '8830', '8831', '8832', '8833']
 trials:        ['HighFine', 'HighGross', 'LowFine', 'LowGross']
 # Path
-raw_eeg_path : 'data/raw/eeg_data/'
-raw_robot_path : 'data/raw/force_data/'
-raw_eeg_dataset : 'data/interim/raw_eeg_dataset.h5'
-clean_eeg_dataset : 'data/interim/clean_eeg_dataset.h5'
-raw_robot_dataset : 'data/interim/raw_robot_dataset.h5'
-torch_dataset : 'data/processed/torch_dataset.h5'
-balanced_torch_dataset : 'data/processed/balanced_torch_dataset.h5'
+raw_eeg_path : 'data/raw/experiment_0/eeg_data/'
+raw_robot_path : 'data/raw/experiment_0/force_data/'
+raw_eeg_dataset : 'data/interim/raw_eeg_exp_0_dataset.h5'
+clean_eeg_dataset : 'data/interim/clean_eeg_exp_0_dataset.h5'
+raw_robot_dataset : 'data/interim/raw_robot_exp_0_dataset.h5'
+torch_dataset : 'data/processed/torch_exp_0_dataset.h5'
+balanced_torch_dataset : 'data/processed/balanced_torch_exp_0_dataset.h5'
 ##---------------------------------------------------------------------##
-# Experiment 1
-# A subset of all subjects are are used for training and  rest is used for testing
-subjects:      ['7708', '8801','8803', '8815', '8819','8821','8822', '8823', '8824', '8826', '8828', '8831', '8832', '8833']
-test_subjects: ['8830', '8802', '7707', '8820']
-trials:        ['HighFine', 'HighGross', 'LowFine', 'LowGross']
-# Paths
-raw_eeg_path : 'data/raw/eeg_data/'
-raw_robot_path : 'data/raw/force_data/'
-raw_eeg_dataset : 'data/interim/raw_eeg_dataset.h5'
-clean_eeg_dataset : 'data/interim/clean_eeg_dataset.h5'
-raw_robot_dataset : 'data/interim/raw_robot_dataset.h5'
-torch_dataset : 'data/processed/torch_dataset.h5'
-balanced_torch_dataset : 'data/processed/balanced_torch_dataset.h5'
+# # Experiment 1
+# # A subset of all subjects are are used for training and  rest is used for testing
+# subjects:      ['7708', '8801','8803', '8815', '8819','8821','8822', '8823', '8824', '8826', '8828', '8831', '8832', '8833']
+# test_subjects: ['8830', '8802', '7707', '8820']
+# trials:        ['HighFine', 'HighGross', 'LowFine', 'LowGross']
+# # Paths
+# raw_eeg_path : 'data/raw/experiment_1/eeg_data/'
+# raw_robot_path : 'data/raw/experiment_1/force_data/'
+# raw_eeg_dataset : 'data/interim/raw_eeg_exp_1_dataset.h5'
+# clean_eeg_dataset : 'data/interim/clean_eeg_exp_1_dataset.h5'
+# raw_robot_dataset : 'data/interim/raw_robot_exp_1_dataset.h5'
+# torch_dataset : 'data/processed/torch_exp_1_dataset.h5'
+# balanced_torch_dataset : 'data/processed/balanced_torch_exp_1_dataset.h5'
 ##---------------------------------------------------------------------##
 # # Experiment 2
-# Testing data is compeletely different from training data
+# # Testing data is compeletely different from training data
 # subjects:    ['8801','8802','8803','8821','8823', '8830', '8831', '8832', '8833']
 # trials:      ['AdaptComb', 'HighComb', 'LowComb']
 # # Paths
@@ -51,4 +51,4 @@ balanced_torch_dataset : 'data/processed/balanced_torch_dataset.h5'
 # clean_eeg_dataset : 'data/interim/clean_eeg_exp_2_dataset.h5'
 # raw_robot_dataset : 'data/interim/raw_robot_exp_2_dataset.h5'
 # torch_dataset : 'data/processed/torch_exp_exp_2_dataset.h5'
-# balanced_torch_dataset : 'data/processed/balanced_torch_dataset.h5'
+# balanced_torch_dataset : 'data/processed/balanced_torch_exp_2_dataset.h5'
