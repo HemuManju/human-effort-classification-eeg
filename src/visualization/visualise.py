@@ -28,7 +28,7 @@ def plot_robot_position(subject, trial, config):
     n_features = len(temp_data.info['ch_names'])
     sub_data = temp_data.get_data().transpose(1, 0, 2).reshape(n_features, -1)
     # plotting
-    plt.plot(sub_data[1, :], sub_data[0, :])  # robot co-ordinates are flipped
+    plt.plot(sub_data[1, :], sub_data[0, :], alpha=0.35)  # robot co-ordinates are flipped
 
     return None
 
@@ -92,15 +92,16 @@ def plot_predictions(subject, trial, config, predictions):
     idx_down = np.where(predictions == 1)
     idx_O = np.where(predictions == 2)
 
-    # Plotting
+    # Plotting the prediction
     plt.scatter(x[idx_up], y[idx_up], marker='^')
     plt.scatter(x[idx_O], y[idx_O], marker='o')
     plt.scatter(x[idx_down], y[idx_down], marker='v')
-    plt.tick_params(labelright=False, top=False,
-                    labelleft=False, labelbottom=False)
-    # plt.legend(['Increase', 'Hold', 'Decrease'])
-    # plt.xlabel('x')
-    # plt.ylabel('y')
+    plt.legend(['Increase', 'Hold', 'Decrease'])
+
+    # Plotting the curve
+    plot_robot_position(subject, trial, config)
+    plt.xlabel('x')
+    plt.ylabel('y')
 
     return None
 
@@ -146,3 +147,4 @@ def plot_predictions_with_instability(subject, trial, config, predictions, ins_i
         plt.ylabel('y')
 
     return None
+    
