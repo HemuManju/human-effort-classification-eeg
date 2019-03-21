@@ -73,9 +73,11 @@ def collective_data_iterator(config, predicting=False):
 
     """
     data_iterator = {}
-    data_path = config['data_path']
+    data_path = str(
+        Path(__file__).parents[2] / config['balanced_torch_dataset'])
     BATCH_SIZE = config['BATCH_SIZE']
     TEST_SIZE = config['TEST_SIZE']
+    data = dd.io.load(data_path)
     if predicting:
         ids_list = dd.io.load(data_path, group='/data_index')
         # Create datasets

@@ -6,6 +6,7 @@ import deepdish as dd
 import numpy as np
 import collections
 
+
 def one_hot_encode(label_length, category):
     """Generate one hot encoded value of required length and category.
 
@@ -85,14 +86,14 @@ def torch_dataset(subjects, trials, config):
 
     """
     # Initialize the numpy array
-    torch_dataset = collections.defaultdict(dict)
+    torch_dataset = {}
     x_temp = np.empty((0, config['n_electrodes'],
                        config['epoch_length'] * config['s_freq']))
     y_temp = np.empty((0, config['n_class']))
 
     for subject in subjects:
         for trial in trials:
-            if subject not in config['test_subjects']
+            if subject not in config['test_subjects']:
                 x_array, y_array = convert_to_array(subject, trial, config)
                 x_temp = np.concatenate((x_temp, x_array), axis=0)
                 y_temp = np.concatenate((y_temp, y_array), axis=0)
@@ -117,12 +118,13 @@ def balanced_torch_dataset(config):
         A balanced dataset.
 
     """
-    balanced_dataset = collections.defaultdict(dict)
+    balanced_dataset = {}
     data_path = str(Path(__file__).parents[2] / config['torch_dataset'])
     data = dd.io.load(data_path)
     features = np.array(data['features'])
     labels = np.array(data['labels'])
     ids = data['data_index']
+    print(ids)
     # Get each class labels
     class_1_ids = ids[np.argmax(labels, axis=1) == 0]
     class_2_ids = ids[np.argmax(labels, axis=1) == 1]
@@ -139,4 +141,4 @@ def balanced_torch_dataset(config):
     balanced_dataset['labels'] = labels[ids_list, :]
     balanced_dataset['data_index'] = np.arange(ids_list.shape[0])
 
-    return balanced_datasetSS
+    return balanced_dataset

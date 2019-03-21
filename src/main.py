@@ -27,19 +27,19 @@ from utils import *
 config = yaml.load(open('config.yml'))
 
 
-with skip_run_code('run', 'create_eeg_dataset') as check, check():
+with skip_run_code('skip', 'create_eeg_dataset') as check, check():
     eeg_dataset = eeg_dataset(config['subjects'], config['trials'])
     save_path = Path(__file__).parents[1] / config['raw_eeg_dataset']
     save_dataset(save_path, eeg_dataset, save=True)
 
 
-with skip_run_code('run', 'clean_eeg_dataset') as check, check():
+with skip_run_code('skip', 'clean_eeg_dataset') as check, check():
     clean_dataset = clean_dataset(config['subjects'], config['trials'])
     save_path = Path(__file__).parents[1] / config['clean_eeg_dataset']
     save_dataset(save_path, clean_dataset, save=True)
 
 
-with skip_run_code('run', 'create_robot_dataset') as check, check():
+with skip_run_code('skip', 'create_robot_dataset') as check, check():
     robot_dataset = robot_dataset(config['subjects'], config['trials'])
     save_path = Path(__file__).parents[1] / config['raw_robot_dataset']
     save_dataset(str(save_path), robot_dataset, save=True)
@@ -52,27 +52,18 @@ with skip_run_code('run', 'torch_dataset') as check, check():
 
 
 with skip_run_code('skip', 'balanced_torch_dataset') as check, check():
-    balanced_dataset = create_balanced_dataset(config)
+    balanced_dataset = balanced_torch_dataset(config)
     save_path = Path(__file__).parents[1] / config['balanced_torch_dataset']
-    save_dataset(str(save_path), balanced_torch_dataset, save=False)
+    save_dataset(str(save_path), balanced_dataset, save=True)
 
 
 with skip_run_code('skip', 'training') as check, check():
-    data_path = Path(__file__).parents[1] / \
-        'data/processed/balanced_torch_dataset.h5'
-    config['data_path'] = str(data_path)
-    trained_model, trained_model_info = train(ShallowEEGNet, config)
-    save = True
-    save_path = str(Path(__file__).parents[1] / 'models')
-    if save:
-        time_stamp = datetime.now().strftime("%Y_%b_%d_%H_%M_%S")
-        torch.save(trained_model, save_path +
-                   '/model_' + time_stamp + '.pth')
-        torch.save(trained_model_info, save_path +
-                   '/model_info_' + time_stamp + '.pth')
-        # Save time also
-        with open(save_path + '/time.txt', "a") as f:
-            f.write(time_stamp + '\n')
+    for _ in range(5):
+        trained_model, trained_model_info = train(ShallowEEGNet, config)
+        save_path = str(
+            Path(__file__).parents[1] / config['trained_model_path'])
+        save_trained_pytorch_model(
+            trained_model, trained_model_info, save_path)
 
 
 with skip_run_code('skip', 'plot_all_subjects_prediction') as check, check():
@@ -112,9 +103,11 @@ with skip_run_code('skip', 'plot_all_subjects_prediction_svm_classifier') as che
     for subject in config['subjects']:
         for trial in config['trials']:
             plt.subplot(len(config['subjects']), len(config['trials']), count)
-            predictions = svm_tangent_space_prediction(clf, subject, trial, config)
+            predictions = svm_tangent_space_prediction(
+                clf, subject, trial, config)
             ins_index = instability_index(subject, trial, config)
-            plot_predictions_with_instability(subject, trial, config, predictions, ins_index, details=False)
+            plot_predictions_with_instability(
+                subject, trial, config, predictions, ins_index, details=False)
             count = count + 1
     plt.show()
 
@@ -204,7 +197,8 @@ with skip_run_code('skip', 'all_subjects_spatial_pattern_classification') as che
     for subject in config['subjects']:
         for trial in config['trials']:
             plt.subplot(len(config['subjects']), len(config['trials']), count)
-            predictions = svm_tangent_space_prediction(clf, subject, trial, config)
+            predictions = svm_tangent_space_prediction(
+                clf, subject, trial, config)
             ins_index = instability_index(subject, trial, config)
             plot_predictions_with_instability(
                 subject, trial, config, predictions, ins_index, details=False)

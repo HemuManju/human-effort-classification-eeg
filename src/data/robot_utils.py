@@ -199,7 +199,6 @@ def create_robot_epochs(subject, trial):
     # Sync with eeg time
     eeg_epochs = read_eeg_epochs(subject, trial)  # eeg file
     drop_id = [id for id, val in enumerate(eeg_epochs.drop_log) if val]
-    print(drop_id)
     if len(eeg_epochs.drop_log) != len(epochs.drop_log):
         raise Exception('Two epochs are not of same length!')
     else:
