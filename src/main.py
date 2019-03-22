@@ -1,4 +1,3 @@
-from decorators import skip
 import yaml
 import deepdish as dd
 from pathlib import Path
@@ -14,12 +13,11 @@ from data.clean_eeg_dataset import clean_dataset
 from data.create_torch_dataset import torch_dataset
 from data.create_torch_dataset import balanced_torch_dataset
 from features.instability import instability_index
-from models.train_model import train
+from models.base_model import train
 from models.networks import ShallowEEGNet
 from models.spatial_model import svm_tangent_space_classifier, svm_tangent_space_prediction
 from visualization.visualise import plot_model_accuracy, plot_robot_position
-from visualization.visualise import plot_predictions, plot_predictions_with_instability
-from decorators import skip_run_code
+from visualization.visualise import plot_predictions, plot_average_model_accuracy
 from utils import *
 
 config = yaml.load(open('config.yml'))
@@ -64,6 +62,14 @@ with skip_run_code('skip', 'training') as check, check():
             trained_model, trained_model_info, save_path)
 
 
+with skip_run_code('skip', 'plot_accuracy') as check, check():
+    plot_model_accuracy('experiment_1', config, 1)
+
+
+with skip_run_code('run', 'plot_average_accuracy') as check, check():
+    plot_average_model_accuracy('experiment_1', config)
+
+
 with skip_run_code('skip', 'plot_all_subjects_prediction') as check, check():
     for i, subject in enumerate(config['subjects']):
         plt.figure(i)
@@ -71,8 +77,7 @@ with skip_run_code('skip', 'plot_all_subjects_prediction') as check, check():
             plt.subplot(2, 2, j+1)
             vote = voted_labels('experiment_1', subject, trial, config)
             ins_index = instability_index(subject, trial, config)
-            plot_predictions_with_instability(
-                subject, trial, config, vote, ins_index, details=False)
+            plot_predictions(subject, trial, config, vote, ins_index)
     plt.show()
 
 
@@ -95,11 +100,11 @@ with skip_run_code('skip', 'plot_subject_task_specific_prediction') as check, ch
     subject = config['subjects'][0]
     trial = config['trials'][0]
     vote = voted_labels('experiment_1', subject, trial, config)
-    plot_predictions(subject, trial, config, vote)
+    plot_predictions(subject, trial, config, vote, None)
     plt.show()
 
 
-with skip_run_code('run', 'plot_subject_specific_prediction') as check, check():
+with skip_run_code('skip', 'plot_subject_specific_prediction') as check, check():
     subject = config['test_subjects'][2]
     trials = config['trials']
     sb.set()
@@ -107,7 +112,7 @@ with skip_run_code('run', 'plot_subject_specific_prediction') as check, check():
     for i, trial in enumerate(config['trials']):
         plt.subplot(len(trials)//2, len(trials)//2, i+1)
         vote = voted_labels('experiment_1', subject, trial, config)
-        plot_predictions(subject, trial, config, vote)
+        plot_predictions(subject, trial, config, vote, None)
         plt.title(trial)
     plt.show()
 
@@ -169,7 +174,6 @@ with skip_run_code('skip', 'all_subjects_spatial_pattern_classification') as che
             predictions = svm_tangent_space_prediction(
                 clf, subject, trial, config)
             ins_index = instability_index(subject, trial, config)
-            plot_predictions_with_instability(
-                subject, trial, config, predictions, ins_index, details=False)
+            plot_predictions(subject, trial, config, predictions, ins_index)
             count = count + 1
     plt.show()

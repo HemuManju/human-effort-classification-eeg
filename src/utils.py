@@ -1,4 +1,3 @@
-from decorators import skip
 import yaml
 import deepdish as dd
 from pathlib import Path
@@ -11,9 +10,66 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from scipy.stats import mode
 from models.predict_model import predict_all_task, predict_subject_task_specific
+from contextlib import contextmanager
 
 
-def get_model_path(experiment):
+
+class skip(object):
+    """A decorator to skip function execution.
+
+    Parameters
+    ----------
+    f : function
+        Any function whose execution need to be skipped.
+
+    Attributes
+    ----------
+    f
+
+    """
+
+    def __init__(self, f):
+        self.f = f
+
+    def __call__(self, *args):
+        print('skipping : ' + self.f.__name__)
+
+
+class SkipWith(Exception):
+    pass
+
+
+@contextmanager
+def skip_run_code(flag, f):
+    """To skip a block of code.
+
+    Parameters
+    ----------
+    flag : str
+        skip or run.
+
+    Returns
+    -------
+    None
+
+    """
+
+    @contextmanager
+    def check_active():
+        deactivated = ['skip']
+        if flag in deactivated:
+            print('Skipping the block: ' + f)
+            raise SkipWith()
+        else:
+            print('Running the block: ' + f)
+            yield
+    try:
+        yield check_active
+    except SkipWith:
+        pass
+
+
+def get_model_path(experiment, model_number):
     """Get all the trained model paths from experiment.
 
     Parameters
@@ -27,12 +83,12 @@ def get_model_path(experiment):
 
     """
 
-    path = str(Path(__file__).parents[1] / 'models')
-    with open(path + '/time.txt', "r+") as f:
-        time_stamp = f.readlines()
-    time_stamp = time_stamp[-1][0:-1]
-    model_path = path + '/model_' + time_stamp + '.pth'
-    model_info_path = path + '/model_info_' + time_stamp + '.pth'
+    read_path = str(Path(__file__).parents[1]) + '/models/' + experiment
+    with open(read_path + '/time.txt', "r+") as f:
+        trained_models = f.readlines()[model_number]
+    model_time = trained_model.splitlines()[0] # remove "\n"
+    model_path = str(Path(__file__).parents[1]) + '/models/' + experiment + '/model_' + model_time + '.pth'
+    model_info_path = str(Path(__file__).parents[1]) + '/models/' + experiment + '/model_info_' + model_time + '.pth'
 
     return model_path, model_info_path
 
