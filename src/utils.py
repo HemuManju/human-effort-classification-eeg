@@ -13,7 +13,6 @@ from models.predict_model import predict_all_task, predict_subject_task_specific
 from contextlib import contextmanager
 
 
-
 class skip(object):
     """A decorator to skip function execution.
 
@@ -40,7 +39,7 @@ class SkipWith(Exception):
 
 
 @contextmanager
-def skip_run_code(flag, f):
+def skip_run(flag, f):
     """To skip a block of code.
 
     Parameters
@@ -63,6 +62,7 @@ def skip_run_code(flag, f):
         else:
             print('Running the block: ' + f)
             yield
+
     try:
         yield check_active
     except SkipWith:
@@ -86,9 +86,13 @@ def get_model_path(experiment, model_number):
     read_path = str(Path(__file__).parents[1]) + '/models/' + experiment
     with open(read_path + '/time.txt', "r+") as f:
         trained_models = f.readlines()[model_number]
-    model_time = trained_model.splitlines()[0] # remove "\n"
-    model_path = str(Path(__file__).parents[1]) + '/models/' + experiment + '/model_' + model_time + '.pth'
-    model_info_path = str(Path(__file__).parents[1]) + '/models/' + experiment + '/model_info_' + model_time + '.pth'
+    model_time = trained_model.splitlines()[0]  # remove "\n"
+    model_path = str(
+        Path(__file__).parents[1]
+    ) + '/models/' + experiment + '/model_' + model_time + '.pth'
+    model_info_path = str(
+        Path(__file__).parents[1]
+    ) + '/models/' + experiment + '/model_info_' + model_time + '.pth'
 
     return model_path, model_info_path
 
@@ -138,11 +142,13 @@ def voted_labels(experiment, subject, trial, config):
     # Voting
     labels = []
     for trained_model in trained_models:
-        model_time = trained_model.splitlines()[0] # remove "\n"
-        model_path = str(Path(__file__).parents[1]) + '/models/' + experiment + '/model_' + model_time + '.pth'
+        model_time = trained_model.splitlines()[0]  # remove "\n"
+        model_path = str(
+            Path(__file__).parents[1]
+        ) + '/models/' + experiment + '/model_' + model_time + '.pth'
         # Predictions
-        predicted_labels = predict_subject_task_specific(model_path,
-                                                         subject, trial, config)
+        predicted_labels = predict_subject_task_specific(
+            model_path, subject, trial, config)
         # voting system
         labels.append(predicted_labels)
     vote, _ = mode(np.array(labels), axis=0)
@@ -162,10 +168,9 @@ def save_trained_pytorch_model(trained_model, trained_model_info, save_path):
     """
 
     time_stamp = datetime.now().strftime("%Y_%b_%d_%H_%M_%S")
-    torch.save(trained_model, save_path
-               + '/model_' + time_stamp + '.pth')
-    torch.save(trained_model_info, save_path
-               + '/model_info_' + time_stamp + '.pth')
+    torch.save(trained_model, save_path + '/model_' + time_stamp + '.pth')
+    torch.save(trained_model_info,
+               save_path + '/model_info_' + time_stamp + '.pth')
     # Save time also
     with open(save_path + '/time.txt', "a") as f:
         f.write(time_stamp + '\n')
