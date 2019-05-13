@@ -23,20 +23,28 @@ def interaction_band_pow(subject, trial, config):
 
     """
 
-    read_path = path = str(Path(__file__).parents[2] / config['raw_robot_dataset'])
+    read_path = path = str(
+        Path(__file__).parents[2] / config['raw_robot_dataset'])
     all_data = dd.io.load(path)
     data = all_data[subject]['robot'][trial].get_data()
     # Variables
-    freq_bands = [[0,128.0]]
+    freq_bands = [[0, 128.0]]
     epochs = data.shape[0]
-    idx = ['x', 'y', 'force_x', 'force_y', 'total_force', 'moment_x', 'moment_y', 'total_moment', 'moment_scaled'].index('moment_scaled')
+    idx = [
+        'x', 'y', 'force_x', 'force_y', 'total_force', 'moment_x', 'moment_y',
+        'total_moment', 'moment_scaled'
+    ].index('moment_scaled')
 
     # Calculate the power
     band_pow = []
     for i in range(epochs):
-        freqs, power = welch(data[i,idx,:], fs=256, nperseg=128, nfft=256, detrend=False)
+        freqs, power = welch(data[i, idx, :],
+                             fs=256,
+                             nperseg=128,
+                             nfft=256,
+                             detrend=False)
         band_pow.append(power)
-    band_pow = np.sqrt(np.array(band_pow)*256/2)
+    band_pow = np.sqrt(np.array(band_pow) * 256 / 2)
 
     return band_pow, np.array(freqs)
 
@@ -66,8 +74,8 @@ def instability_index(subject, trial, config):
     # Get frequency index between 3 Hz and 12 Hz
     f_min_max = (freqs <= 10) & (freqs > 2)
     f_0_max = (freqs <= 10) & (freqs > 0)
-    num = data[:,f_min_max].sum(axis=1)
-    den = data[:,f_0_max].sum(axis=1)
-    ins_index = np.expand_dims(num/den, axis=1).flatten()
+    num = data[:, f_min_max].sum(axis=1)
+    den = data[:, f_0_max].sum(axis=1)
+    ins_index = np.expand_dims(num / den, axis=1).flatten()
 
     return ins_index

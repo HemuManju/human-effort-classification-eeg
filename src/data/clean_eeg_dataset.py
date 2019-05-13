@@ -18,10 +18,13 @@ def autoreject_repair_epochs(epochs, reject_plot=False):
     """
     # Cleaning with autoreject
     picks = mne.pick_types(epochs.info, eeg=True)  # Pick EEG channels
-    ar = AutoReject(n_interpolate=[1, 4, 8], n_jobs=6, picks=picks,
+    ar = AutoReject(n_interpolate=[1, 4, 8],
+                    n_jobs=6,
+                    picks=picks,
                     thresh_func='bayesian_optimization',
                     cv=10,
-                    random_state=42, verbose=False)
+                    random_state=42,
+                    verbose=False)
 
     cleaned_epochs, reject_log = ar.fit_transform(epochs, return_log=True)
 
@@ -45,7 +48,8 @@ def append_eog_index(epochs, ica):
     """
     # Find bad EOG artifact (eye blinks) by correlating with Fp1
     eog_inds, scores_eog = ica.find_bads_eog(epochs,
-                                             ch_name='Fp1', verbose=False)
+                                             ch_name='Fp1',
+                                             verbose=False)
     eog_inds.sort()
     # Append only when the correlation is high
     id_eog = [i for i, n in enumerate(scores_eog.tolist()) if abs(n) >= 0.65]
@@ -53,7 +57,8 @@ def append_eog_index(epochs, ica):
 
     # Find bad EOG artifact (eye blinks) by correlation with Fp2
     eog_inds, scores_eog = ica.find_bads_eog(epochs,
-                                             ch_name='Fp2', verbose=False)
+                                             ch_name='Fp2',
+                                             verbose=False)
     eog_inds.sort()
     # Append only when the correlation is high
     id_eog = [i for i, n in enumerate(scores_eog.tolist()) if abs(n) >= 0.65]
@@ -75,10 +80,15 @@ def clean_with_ica(epochs, show_ica=False):
 
     """
 
-    picks = mne.pick_types(epochs.info, meg=False, eeg=True,
-                           eog=False, stim=False, exclude='bads')
+    picks = mne.pick_types(epochs.info,
+                           meg=False,
+                           eeg=True,
+                           eog=False,
+                           stim=False,
+                           exclude='bads')
     ica = mne.preprocessing.ICA(n_components=None,
-                                method="picard", verbose=False)
+                                method="picard",
+                                verbose=False)
     # Get the rejection threshold using autoreject
     reject_threshold = get_rejection_threshold(epochs)
     ica.fit(epochs, picks=picks, reject=reject_threshold)
@@ -111,7 +121,7 @@ def clean_dataset(subjects, trials):
     raw_eeg = dd.io.load(str(read_path))  # load the raw eeg
 
     for subject in subjects:
-        data = data = collections.defaultdict(dict)
+        data = collections.defaultdict(dict)
         for trial in trials:
             epochs = raw_eeg[subject]['eeg'][trial]
             ica_epochs, ica = clean_with_ica(epochs)

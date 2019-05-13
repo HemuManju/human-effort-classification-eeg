@@ -41,8 +41,8 @@ def train(network, config, new_weights=False):
 
     # Loss and optimizer
     criterion = nn.NLLLoss()
-    optimizer = torch.optim.Adam(
-        model.parameters(), lr=config['LEARNING_RATE'])
+    optimizer = torch.optim.Adam(model.parameters(),
+                                 lr=config['LEARNING_RATE'])
 
     # Visual logger
     visual_logger = visual_log('Task type classification')
@@ -67,6 +67,7 @@ def train(network, config, new_weights=False):
         visual_logger.log(epoch, [accuracy[0], accuracy[1], accuracy[2]])
 
     # Add loss function info to parameter.
-    model_info = create_model_info(config, str(criterion), np.array(accuracy_log))
+    model_info = create_model_info(config, str(criterion),
+                                   np.array(accuracy_log))
 
     return model, model_info

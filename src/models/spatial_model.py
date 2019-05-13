@@ -32,19 +32,23 @@ def svm_tangent_space_classifier(config):
     y = dd.io.load(path, group='/data_index')
 
     # Train test split
-    train_id, test_id, _, _ = train_test_split(y, y * 0, test_size=2 * config['TEST_SIZE'])
+    train_id, test_id, _, _ = train_test_split(y,
+                                               y * 0,
+                                               test_size=2 *
+                                               config['TEST_SIZE'])
     # Training
     train_features = features[train_id, :, :]
     train_labels = np.argmax(labels[train_id, :], axis=1)
-    print(np.sum(labels[train_id, :], axis=0)/len(labels[train_id, :]))
+    print(np.sum(labels[train_id, :], axis=0) / len(labels[train_id, :]))
     # Testing (not used here)
     test_features = features[test_id, :, :]
     test_labels = np.argmax(labels[test_id, :], axis=1)
 
     # Construct sklearn pipeline
-    clf = make_pipeline(Covariances(estimator='lwf'), TangentSpace(), SVC(kernel='linear'))
+    clf = make_pipeline(Covariances(estimator='lwf'), TangentSpace(),
+                        SVC(kernel='linear'))
     # cross validation
-    clf.fit(train_features , train_labels)
+    clf.fit(train_features, train_labels)
 
     return clf
 
@@ -69,7 +73,6 @@ def svm_tangent_space_prediction(clf, subject, trial, config):
         Predicted labels from the model.
 
     """
-
 
     n_electrodes = config['n_electrodes']
     epoch_length = config['epoch_length']

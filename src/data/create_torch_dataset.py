@@ -48,8 +48,7 @@ def convert_to_array(subject, trial, config):
     n_electrodes = config['n_electrodes']
     epoch_length = config['epoch_length']
     s_freq = config['s_freq']
-    eeg_path = str(
-        Path(__file__).parents[2] / config['clean_eeg_dataset'])
+    eeg_path = str(Path(__file__).parents[2] / config['clean_eeg_dataset'])
     data = dd.io.load(eeg_path, group='/' + subject)
     x = data['eeg'][trial].get_data()
     if trial == 'HighFine':
@@ -87,8 +86,8 @@ def torch_dataset(subjects, trials, config):
     """
     # Initialize the numpy array
     torch_dataset = {}
-    x_temp = np.empty((0, config['n_electrodes'],
-                       config['epoch_length'] * config['s_freq']))
+    x_temp = np.empty(
+        (0, config['n_electrodes'], config['epoch_length'] * config['s_freq']))
     y_temp = np.empty((0, config['n_class']))
 
     for subject in subjects:
@@ -131,8 +130,9 @@ def balanced_torch_dataset(config):
     class_3_ids = ids[np.argmax(labels, axis=1) == 2]
 
     # Drop 50% of class 3 labels
-    index = np.random.choice(
-        class_3_ids.shape[0], int(class_3_ids.shape[0] / 2), replace=False)
+    index = np.random.choice(class_3_ids.shape[0],
+                             int(class_3_ids.shape[0] / 2),
+                             replace=False)
     # print(sum(kept) / len(ids))
     class_3_ids = class_3_ids[index]
     # Concatenate all of them

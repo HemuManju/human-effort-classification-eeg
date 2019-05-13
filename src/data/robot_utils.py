@@ -60,7 +60,9 @@ def append_xyz(subject, trial):
 
     """
     trial_path = get_trial_path(subject, trial)
-    joint_angles = np.genfromtxt(trial_path, dtype=float, delimiter=',',
+    joint_angles = np.genfromtxt(trial_path,
+                                 dtype=float,
+                                 delimiter=',',
                                  usecols=[1, 2, 3, 4, 5, 6],
                                  skip_header=1).tolist()
     data = np.insert(joint_angles, 0, 0, axis=1)  # Add zero for base of robot
@@ -96,15 +98,20 @@ def forward_kinematics(joint_angles):
     pb.loadURDF("plane.urdf", start_pos)
     robot_path = path = str(
         Path(__file__).parents[1] / 'power_ball/powerball.urdf')
-    robot = pb.loadURDF(robot_path, start_pos,
-                        start_orientation, useFixedBase=True)
+    robot = pb.loadURDF(robot_path,
+                        start_pos,
+                        start_orientation,
+                        useFixedBase=True)
 
     obs = []
     pb.setRealTimeSimulation(enableRealTimeSimulation=1)
     for q in joint_angles:
         for _ in range(3):
-            pb.setJointMotorControlArray(robot, range(
-                7), controlMode=pb.POSITION_CONTROL, targetPositions=q)  # set the joint angles
+            pb.setJointMotorControlArray(
+                robot,
+                range(7),
+                controlMode=pb.POSITION_CONTROL,
+                targetPositions=q)  # set the joint angles
             pb.stepSimulation()  # Execute the forward kinematics
         obs.append(pb.getLinkState(robot, 6)[0])
 
@@ -128,11 +135,17 @@ def get_robot_data(subject, trial):
 
     """
     trial_path = get_trial_path(subject, trial)
-    data = np.genfromtxt(trial_path, dtype=float, delimiter=',',
+    data = np.genfromtxt(trial_path,
+                         dtype=float,
+                         delimiter=',',
                          usecols=[13, 14, 15, 16, 17, 18, 19, 20],
-                         skip_footer=100, skip_header=150).tolist()
-    time_data = np.genfromtxt(trial_path, dtype=str, delimiter=',',
-                              usecols=0, skip_footer=150,
+                         skip_footer=100,
+                         skip_header=150).tolist()
+    time_data = np.genfromtxt(trial_path,
+                              dtype=str,
+                              delimiter=',',
+                              usecols=0,
+                              skip_footer=150,
                               skip_header=100).tolist()
     # Get the sampling frequency
     time = [datetime.strptime(item, '%H:%M:%S:%f') for item in time_data]
@@ -155,8 +168,8 @@ def get_robot_data(subject, trial):
     smooth_force = np.mean(total_force) / np.mean(total_moment) * total_moment
 
     # Stack all the vectors
-    robot_data = np.vstack((x, y, force_x, force_y, total_force,
-                            moment_x, moment_y, total_moment, smooth_force))
+    robot_data = np.vstack((x, y, force_x, force_y, total_force, moment_x,
+                            moment_y, total_moment, smooth_force))
     start_time = time[0]
     end_time = time[-1]
     duration = (time[-1] - time[0]).total_seconds()
@@ -181,9 +194,10 @@ def create_robot_epochs(subject, trial):
 
     """
     data, start_time, end_time, duration = get_robot_data(subject, trial)
-    info = mne.create_info(ch_names=['x', 'y', 'force_x', 'force_y',
-                                     'total_force', 'moment_x', 'moment_y',
-                                     'total_moment', 'smooth_force'],
+    info = mne.create_info(ch_names=[
+        'x', 'y', 'force_x', 'force_y', 'total_force', 'moment_x', 'moment_y',
+        'total_moment', 'smooth_force'
+    ],
                            ch_types=['misc'] * data.shape[0],
                            sfreq=256.0)
     raw = mne.io.RawArray(data, info, verbose=False)
@@ -193,8 +207,7 @@ def create_robot_epochs(subject, trial):
     raw.info['subject_info'] = subject
     raw.info['experimenter'] = 'hemanth'
     events = mne.make_fixed_length_events(raw, duration=epoch_length)
-    epochs = mne.Epochs(raw, events, tmin=0,
-                        tmax=epoch_length, verbose=False)
+    epochs = mne.Epochs(raw, events, tmin=0, tmax=epoch_length, verbose=False)
 
     # Sync with eeg time
     eeg_epochs = read_eeg_epochs(subject, trial)  # eeg file

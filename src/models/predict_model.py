@@ -31,7 +31,8 @@ def predict_all_task(trained_model_path, config, subject_specific):
     for subject in config['subjects']:
         for trial in config['trials']:
             if subject_specific:
-                data_iterator = subject_specific_data_iterator(subject, trial, config)
+                data_iterator = subject_specific_data_iterator(
+                    subject, trial, config)
                 labels[subject][trial] = calculate_predictions(
                     trained_model, data_iterator, config)
             else:

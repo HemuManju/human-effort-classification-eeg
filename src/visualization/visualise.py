@@ -30,7 +30,8 @@ def plot_robot_position(subject, trial, config):
     sub_data = temp_data.get_data().transpose(1, 0, 2).reshape(n_features, -1)
     # plotting
     fig, ax = plt.subplots()
-    ax.plot(sub_data[1, :], sub_data[0, :], alpha=0.35)  # robot co-ordinates are flipped
+    ax.plot(sub_data[1, :], sub_data[0, :],
+            alpha=0.35)  # robot co-ordinates are flipped
     plt.show()
 
     return None
@@ -43,7 +44,8 @@ def plot_average_model_accuracy(experiment, config):
     fig, ax = plt.subplots()
 
     keys = ['training_accuracy', 'validation_accuracy', 'testing_accuracy']
-    colors = [[0.69, 0.18, 0.45, 1.00], [0.49, 0.49, 0.49, 1.00], [0.12, 0.27, 0.59, 1.00]]
+    colors = [[0.64, 0.29, 0.30, 1.00], [0.49, 0.49, 0.49, 1.00],
+              [0.12, 0.27, 0.59, 1.00]]
     for i, key in enumerate(keys):
         accuracy = np.empty((0, config['NUM_EPOCHS']))
         for j in range(5):
@@ -54,8 +56,16 @@ def plot_average_model_accuracy(experiment, config):
         average = np.mean(accuracy, axis=0)
         min_val = average - np.min(accuracy, axis=0)
         max_val = np.max(accuracy, axis=0) - average
-        ax.fill_between(range(config['NUM_EPOCHS']), average-min_val, average+max_val, alpha=0.25, color=colors[i], edgecolor = colors[i])
-        ax.plot(range(config['NUM_EPOCHS']), average, color = colors[i], label=key)
+        ax.fill_between(range(config['NUM_EPOCHS']),
+                        average - min_val,
+                        average + max_val,
+                        alpha=0.25,
+                        color=colors[i],
+                        edgecolor=colors[i])
+        ax.plot(range(config['NUM_EPOCHS']),
+                average,
+                color=colors[i],
+                label=key)
 
     ax.set_ylim(top=1.0)
     # Specifications
@@ -123,7 +133,8 @@ def plot_predictions(subject, trial, config, predictions, ins_index):
     # Select only middle point of the epoch
     sub_data = temp_data.get_data()[:, :, 128]
     x, y = sub_data[:, 1], sub_data[:, 0]
-    if len(x) != len(predictions):  # check is number of predictions matach x or y data
+    if len(x) != len(
+            predictions):  # check is number of predictions matach x or y data
         print(len(x), len(predictions))
         raise Exception('Two epochs are not of same length!')
     # Find three classes
@@ -140,7 +151,10 @@ def plot_predictions(subject, trial, config, predictions, ins_index):
     else:
         ax.scatter(x[idx_up], y[idx_up], marker='^', s=ins_index[idx_up] * 100)
         ax.scatter(x[idx_O], y[idx_O], marker='o', s=ins_index[idx_O] * 100)
-        ax.scatter(x[idx_down], y[idx_down], marker='v',s=ins_index[idx_down] * 100)
+        ax.scatter(x[idx_down],
+                   y[idx_down],
+                   marker='v',
+                   s=ins_index[idx_down] * 100)
     # Plotting the curve
     plot_robot_position(subject, trial, config)
     ax.legend(['Increase', 'Hold', 'Decrease'])

@@ -44,10 +44,12 @@ def data_iterator_ids(path, test_size=0.15):
     """
     y = dd.io.load(path, group='/data_index')
     ids_list = {}
-    train_id, test_id, _, _ = train_test_split(
-        y, y * 0, test_size=2 * test_size)
-    test_id, validate_id, _, _ = train_test_split(
-        test_id, test_id * 0, test_size=0.5)
+    train_id, test_id, _, _ = train_test_split(y,
+                                               y * 0,
+                                               test_size=2 * test_size)
+    test_id, validate_id, _, _ = train_test_split(test_id,
+                                                  test_id * 0,
+                                                  test_size=0.5)
 
     ids_list['training'] = train_id
     ids_list['validation'] = validate_id
@@ -83,8 +85,10 @@ def collective_data_iterator(config, predicting=False):
         # Create datasets
         test_data = CollectiveDataset(ids_list, data_path)
         # Load datasets
-        data_iterator = DataLoader(test_data, batch_size=BATCH_SIZE,
-                                   shuffle=False, num_workers=10)
+        data_iterator = DataLoader(test_data,
+                                   batch_size=BATCH_SIZE,
+                                   shuffle=False,
+                                   num_workers=10)
     else:
         # Load datasets
         ids_list = data_iterator_ids(data_path, test_size=TEST_SIZE)
@@ -93,12 +97,18 @@ def collective_data_iterator(config, predicting=False):
         valid_data = CollectiveDataset(ids_list['validation'], data_path)
         test_data = CollectiveDataset(ids_list['testing'], data_path)
         # Data iterators
-        data_iterator['training'] = DataLoader(
-            train_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=10)
-        data_iterator['validation'] = DataLoader(
-            valid_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=10)
-        data_iterator['testing'] = DataLoader(
-            test_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=10)
+        data_iterator['training'] = DataLoader(train_data,
+                                               batch_size=BATCH_SIZE,
+                                               shuffle=True,
+                                               num_workers=10)
+        data_iterator['validation'] = DataLoader(valid_data,
+                                                 batch_size=BATCH_SIZE,
+                                                 shuffle=True,
+                                                 num_workers=10)
+        data_iterator['testing'] = DataLoader(test_data,
+                                              batch_size=BATCH_SIZE,
+                                              shuffle=True,
+                                              num_workers=10)
 
     return data_iterator
 
@@ -124,16 +134,17 @@ def subject_specific_data_iterator(subject, trial, config):
     n_electrodes = config['n_electrodes']
     epoch_length = config['epoch_length']
     s_freq = config['s_freq']
-    data_path = str(
-        Path(__file__).parents[2] / config['clean_eeg_dataset'])
+    data_path = str(Path(__file__).parents[2] / config['clean_eeg_dataset'])
     data = dd.io.load(data_path, group='/' + subject)
     x = data['eeg'][trial].get_data()
     x = x[:, 0:n_electrodes, 0:epoch_length * s_freq]
     # Create datasets
     test_data = SubjectSpecificDataset(x)
     # Load datasets
-    data_iterator = DataLoader(test_data, batch_size=x.shape[0],
-                               shuffle=False, num_workers=10)
+    data_iterator = DataLoader(test_data,
+                               batch_size=x.shape[0],
+                               shuffle=False,
+                               num_workers=10)
 
     return data_iterator
 
@@ -237,9 +248,12 @@ def visual_log(title):
         pytorch visual logger.
 
     """
-    visual_logger = VisdomPlotLogger('line',
-                                     opts=dict(legend=['Training', 'Validation', 'Testing'],
-                                               xlabel='Epochs', ylabel='Accuracy', title=title))
+    visual_logger = VisdomPlotLogger(
+        'line',
+        opts=dict(legend=['Training', 'Validation', 'Testing'],
+                  xlabel='Epochs',
+                  ylabel='Accuracy',
+                  title=title))
 
     return visual_logger
 
@@ -260,10 +274,12 @@ def create_model_info(config, loss_func, accuracy):
         Description of returned object.
 
     """
-    model_info = {'training_accuracy': accuracy[:, 0],
-                  'validation_accuracy': accuracy[:, 1],
-                  'testing_accuracy': accuracy[:, 2],
-                  'model_parameters': config,
-                  'loss function': loss_func}
+    model_info = {
+        'training_accuracy': accuracy[:, 0],
+        'validation_accuracy': accuracy[:, 1],
+        'testing_accuracy': accuracy[:, 2],
+        'model_parameters': config,
+        'loss function': loss_func
+    }
 
     return model_info

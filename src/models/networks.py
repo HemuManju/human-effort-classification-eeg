@@ -36,16 +36,13 @@ class ShallowEEGNet(nn.Module):
         self.net_1 = nn.Sequential(
             nn.Conv2d(1, 20, kernel_size=(1, 15), stride=1, bias=False),
             nn.Conv2d(20, 20, kernel_size=(20, 20), stride=1, bias=False),
-            nn.BatchNorm2d(20, momentum=0.1, affine=True)
-        )
+            nn.BatchNorm2d(20, momentum=0.1, affine=True))
 
         self.pool = nn.AvgPool2d(kernel_size=(1, 75), stride=(1, 15))
 
         self.net_2 = nn.Sequential(
-            nn.Conv2d(20, OUTPUT,
-                      kernel_size=(1, 10), stride=1),
-            nn.LogSoftmax(dim=1)
-        )
+            nn.Conv2d(20, OUTPUT, kernel_size=(1, 10), stride=1),
+            nn.LogSoftmax(dim=1))
 
     def forward(self, x):
         x = x.view(-1, 1, self.n_electrodes, self.epoch_length * self.s_freq)
