@@ -13,7 +13,7 @@ from data.clean_eeg_dataset import clean_dataset
 from data.create_torch_dataset import torch_dataset
 from data.create_torch_dataset import balanced_torch_dataset
 from features.instability import instability_index
-from models.base_model import train
+from models.train_model import train
 from models.networks import ShallowEEGNet
 from models.spatial_model import svm_tangent_space_classifier, svm_tangent_space_prediction
 from visualization.visualise import plot_model_accuracy, plot_robot_position
@@ -58,10 +58,10 @@ with skip_run('skip', 'training') as check, check():
 with skip_run('skip', 'plot_accuracy') as check, check():
     plot_model_accuracy('experiment_1', config, 1)
 
-with skip_run('run', 'plot_average_accuracy') as check, check():
+with skip_run('skip', 'average_accuracy') as check, check():
     plot_average_model_accuracy('experiment_1', config)
 
-with skip_run('skip', 'plot_all_subjects_prediction') as check, check():
+with skip_run('skip', 'all_subjects_prediction') as check, check():
     for i, subject in enumerate(config['subjects']):
         plt.figure(i)
         for j, trial in enumerate(config['trials']):
@@ -71,7 +71,7 @@ with skip_run('skip', 'plot_all_subjects_prediction') as check, check():
             plot_predictions(subject, trial, config, vote, ins_index)
     plt.show()
 
-with skip_run('skip', 'plot_svm_prediction') as check, check():
+with skip_run('skip', 'svm_prediction') as check, check():
     clf = svm_tangent_space_classifier(config)
     count = 1
     for subject in config['subjects']:
@@ -89,14 +89,14 @@ with skip_run('skip', 'plot_svm_prediction') as check, check():
             count = count + 1
     plt.show()
 
-with skip_run('skip', 'plot_task_specific_prediction') as check, check():
+with skip_run('skip', 'task_specific_prediction') as check, check():
     subject = config['subjects'][0]
     trial = config['trials'][0]
     vote = voted_labels('experiment_1', subject, trial, config)
     plot_predictions(subject, trial, config, vote, None)
     plt.show()
 
-with skip_run('skip', 'plot_subj_specific_prediction') as check, check():
+with skip_run('skip', 'subj_specific_prediction') as check, check():
     subject = config['test_subjects'][2]
     trials = config['trials']
     sb.set()
@@ -108,7 +108,7 @@ with skip_run('skip', 'plot_subj_specific_prediction') as check, check():
         plt.title(trial)
     plt.show()
 
-with skip_run('skip', 'plot_instability_index') as check, check():
+with skip_run('skip', 'instability_index') as check, check():
     # name = ['Adaptive damping', 'Low damping', 'High damping']
     for i in range(len(config['trials'])):
         sb.set()

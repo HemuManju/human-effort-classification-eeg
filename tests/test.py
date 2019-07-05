@@ -7,8 +7,8 @@ import h5py
 import numpy as np
 
 # Configuration files
-path = Path(__file__).parents[1] / 'src/config.yml'
-config = yaml.load(open(path))
+config_path = Path(__file__).parents[1] / 'src/config.yml'
+config = config = yaml.load(open(config_path), Loader=yaml.SafeLoader)
 epoch_length = config['epoch_length']
 subjects = config['subjects']
 trials = config['trials']

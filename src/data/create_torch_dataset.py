@@ -123,7 +123,7 @@ def balanced_torch_dataset(config):
     features = np.array(data['features'])
     labels = np.array(data['labels'])
     ids = data['data_index']
-    print(ids)
+
     # Get each class labels
     class_1_ids = ids[np.argmax(labels, axis=1) == 0]
     class_2_ids = ids[np.argmax(labels, axis=1) == 1]
