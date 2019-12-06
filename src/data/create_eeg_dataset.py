@@ -1,7 +1,5 @@
-import deepdish as dd
-import yaml
 import collections
-from .eeg_utils import *
+from .eeg_utils import create_eeg_epochs
 
 
 def eeg_dataset(subjects, trials):

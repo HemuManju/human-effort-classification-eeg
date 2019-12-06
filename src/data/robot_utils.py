@@ -15,14 +15,15 @@ import deepdish as dd
 from .eeg_utils import get_trial_path, read_eeg_epochs
 
 # Import configuration
-path = Path(__file__).parents[1] / 'config.yml'
-config = yaml.load(open(path))
+# The configuration file
+config_path = Path(__file__).parents[1] / 'config.yml'
+config = yaml.load(open(str(config_path)), Loader=yaml.SafeLoader)
 epoch_length = config['epoch_length']
 
 
 def resample_robot_data(x, freq_in, freq_out):
-    """Resamples the robot data (force, moment, position, or any general vector x) to desired
-    frequency
+    """Resamples the robot data (force, moment, position, or any general vector x)
+    to desired frequency
 
     Parameters
     ----------

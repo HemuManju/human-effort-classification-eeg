@@ -1,21 +1,15 @@
 import mne
 import numpy as np
 from pathlib import Path
-import seaborn as sb
-import pandas as pd
-from mne.parallel import parallel_func
-from mne.decoding import CSP
-from scipy import signal
-from scipy.signal import resample
+
 from datetime import datetime
-from autoreject import Ransac, AutoReject
-from mne.time_frequency import psd_multitaper
-from autoreject import get_rejection_threshold
 import yaml
 import deepdish as dd
 
 # Import configuration
-config = yaml.load(open(str(Path(__file__).parents[1]) + '/config.yml'))
+# The configuration file
+config_path = Path(__file__).parents[1] / 'config.yml'
+config = yaml.load(open(str(config_path)), Loader=yaml.SafeLoader)
 
 
 def get_eeg_path(subject, raw=True):
@@ -161,6 +155,7 @@ def get_eeg_data(subject):
                               exclude=exclude,
                               verbose=False)
     data = raw.get_data()
+    data = np.vstack((data, data[0, :] * 0))
     raw_selected = mne.io.RawArray(data, info, verbose=False)
 
     # Additional information
@@ -173,7 +168,8 @@ def get_eeg_data(subject):
 
 
 def create_eeg_epochs(subject, trial, preload=True):
-    """Get the epcohed eeg data excluding unnessary channels from fif file and also filter the signal.
+    """Get the epcohed eeg data excluding unnessary channels
+    from fif file and also filter the signal.
 
     Parameter
     ----------
@@ -185,6 +181,8 @@ def create_eeg_epochs(subject, trial, preload=True):
     epochs  : epoched data
 
     """
+    epoch_length = config['epoch_length']
+    overlap = config['overlap']
     trial_start, trial_end = get_trial_time(subject, trial)
     raw = get_eeg_data(subject)
     raw_cropped = raw.copy().crop(tmin=trial_start,
@@ -195,9 +193,10 @@ def create_eeg_epochs(subject, trial, preload=True):
                              verbose=False)  # Line noise
     raw_cropped.filter(l_freq=1, h_freq=50, fir_design='firwin',
                        verbose=False)  # Band pass filter
-    raw_cropped.set_eeg_reference('average')
+    # raw_cropped.set_eeg_reference('average')
     events = mne.make_fixed_length_events(raw_cropped,
-                                          duration=config['epoch_length'])
+                                          duration=epoch_length,
+                                          overlap=epoch_length * overlap)
     epochs = mne.Epochs(raw_cropped,
                         events,
                         tmin=0,

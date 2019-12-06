@@ -1,37 +1,15 @@
-import yaml
+import sys
+
+import numpy as np
 import deepdish as dd
 from pathlib import Path
-import seaborn as sb
+
 import torch
-import numpy as np
-from sklearn.preprocessing import normalize, MinMaxScaler
+
 from scipy.stats import mode
-import matplotlib.pyplot as plt
 from datetime import datetime
-from scipy.stats import mode
-from models.predict_model import predict_all_task, predict_subject_task_specific
+from models.predict_model import predict_subject_task_specific
 from contextlib import contextmanager
-
-
-class skip(object):
-    """A decorator to skip function execution.
-
-    Parameters
-    ----------
-    f : function
-        Any function whose execution need to be skipped.
-
-    Attributes
-    ----------
-    f
-
-    """
-
-    def __init__(self, f):
-        self.f = f
-
-    def __call__(self, *args):
-        print('skipping : ' + self.f.__name__)
 
 
 class SkipWith(Exception):
@@ -52,21 +30,37 @@ def skip_run(flag, f):
     None
 
     """
-
     @contextmanager
     def check_active():
         deactivated = ['skip']
+        p = ColorPrint()  # printing options
         if flag in deactivated:
-            print('Skipping the block: ' + f)
+            p.print_skip('{:>12}  {:>2}  {:>12}'.format(
+                'Skipping the block', '|', f))
             raise SkipWith()
         else:
-            print('Running the block: ' + f)
+            p.print_run('{:>12}  {:>3}  {:>12}'.format('Running the block',
+                                                       '|', f))
             yield
 
     try:
         yield check_active
     except SkipWith:
         pass
+
+
+class ColorPrint:
+    @staticmethod
+    def print_skip(message, end='\n'):
+        sys.stderr.write('\x1b[88m' + message.strip() + '\x1b[0m' + end)
+
+    @staticmethod
+    def print_run(message, end='\n'):
+        sys.stdout.write('\x1b[1;32m' + message.strip() + '\x1b[0m' + end)
+
+    @staticmethod
+    def print_warn(message, end='\n'):
+        sys.stderr.write('\x1b[1;33m' + message.strip() + '\x1b[0m' + end)
 
 
 def get_model_path(experiment, model_number):
@@ -86,7 +80,7 @@ def get_model_path(experiment, model_number):
     read_path = str(Path(__file__).parents[1]) + '/models/' + experiment
     with open(read_path + '/time.txt', "r+") as f:
         trained_models = f.readlines()[model_number]
-    model_time = trained_model.splitlines()[0]  # remove "\n"
+    model_time = trained_models.splitlines()[0]  # remove "\n"
     model_path = str(
         Path(__file__).parents[1]
     ) + '/models/' + experiment + '/model_' + model_time + '.pth'

@@ -1,26 +1,33 @@
 import yaml
-import deepdish as dd
 from pathlib import Path
+import deepdish as dd
 import seaborn as sb
-import torch
 import numpy as np
-from sklearn.preprocessing import normalize, MinMaxScaler
 import matplotlib.pyplot as plt
-from datetime import datetime
+
 from data.create_eeg_dataset import eeg_dataset
 from data.create_robot_dataset import robot_dataset
 from data.clean_eeg_dataset import clean_dataset
 from data.create_torch_dataset import torch_dataset
 from data.create_torch_dataset import balanced_torch_dataset
+
 from features.instability import instability_index
+
 from models.train_model import train
 from models.networks import ShallowEEGNet
-from models.spatial_model import svm_tangent_space_classifier, svm_tangent_space_prediction
-from visualization.visualise import plot_model_accuracy, plot_robot_position
-from visualization.visualise import plot_predictions, plot_average_model_accuracy
-from utils import *
+from models.spatial_model import (svm_tangent_space_classifier,
+                                  svm_tangent_space_prediction)
 
-config = yaml.load(open('config.yml'))
+from visualization.visualise import plot_model_accuracy
+from visualization.visualise import (plot_predictions,
+                                     plot_average_model_accuracy)
+
+from utils import (skip_run, save_dataset, save_trained_pytorch_model,
+                   voted_labels, predict_subject_task_specific)
+
+# The configuration file
+config_path = Path(__file__).parents[1] / 'src/config.yml'
+config = yaml.load(open(str(config_path)), Loader=yaml.SafeLoader)
 
 with skip_run('skip', 'create_eeg_dataset') as check, check():
     eeg_dataset = eeg_dataset(config['subjects'], config['trials'])
@@ -28,7 +35,7 @@ with skip_run('skip', 'create_eeg_dataset') as check, check():
     save_dataset(str(save_path), eeg_dataset, save=True)
 
 with skip_run('skip', 'clean_eeg_dataset') as check, check():
-    clean_dataset = clean_dataset(config['subjects'], config['trials'])
+    clean_dataset = clean_dataset(config['subjects'], config['trials'], config)
     save_path = Path(__file__).parents[1] / config['clean_eeg_dataset']
     save_dataset(str(save_path), clean_dataset, save=True)
 
@@ -47,7 +54,7 @@ with skip_run('skip', 'balanced_torch_dataset') as check, check():
     save_path = Path(__file__).parents[1] / config['balanced_torch_dataset']
     save_dataset(str(save_path), balanced_dataset, save=True)
 
-with skip_run('skip', 'training') as check, check():
+with skip_run('skip', 'model_training') as check, check():
     for _ in range(5):
         trained_model, trained_model_info = train(ShallowEEGNet, config)
         save_path = str(
@@ -80,12 +87,12 @@ with skip_run('skip', 'svm_prediction') as check, check():
             predictions = svm_tangent_space_prediction(clf, subject, trial,
                                                        config)
             ins_index = instability_index(subject, trial, config)
-            plot_predictions_with_instability(subject,
-                                              trial,
-                                              config,
-                                              predictions,
-                                              ins_index,
-                                              details=False)
+            # plot_predictions_with_instability(subject,
+            #                                   trial,
+            #                                   config,
+            #                                   predictions,
+            #                                   ins_index,
+            #                                   details=False)
             count = count + 1
     plt.show()
 
@@ -132,14 +139,14 @@ with skip_run('skip', 'instability_index') as check, check():
             # voting system
             all_labels.append(predicted_labels)
         all_labels = np.array(all_labels)
-        vote, _ = mode(all_labels, axis=0)
+        vote, _ = np.mode(all_labels, axis=0)
         ins_index = instability_index(subject, trial, config)
-        plot_predictions_with_instability(subject,
-                                          trial,
-                                          config,
-                                          vote[0],
-                                          ins_index,
-                                          details=True)
+        # plot_predictions_with_instability(subject,
+        #                                   trial,
+        #                                   config,
+        #                                   vote[0],
+        #                                   ins_index,
+        #                                   details=True)
     plt.show()
 
 with skip_run('skip', 'spatial_pattern_classification') as check, check():
@@ -155,12 +162,12 @@ with skip_run('skip', 'spatial_pattern_classification') as check, check():
         print(subject, trial)
         predictions = svm_tangent_space_prediction(clf, subject, trial, config)
         ins_index = instability_index(subject, trial, config)
-        plot_predictions_with_instability(subject,
-                                          trial,
-                                          config,
-                                          predictions,
-                                          ins_index,
-                                          details=True)
+        # plot_predictions_with_instability(subject,
+        #                                   trial,
+        #                                   config,
+        #                                   predictions,
+        #                                   ins_index,
+        #                                   details=True)
     plt.show()
 
 with skip_run('skip', 'spatial_pattern_classification') as check, check():
@@ -175,3 +182,8 @@ with skip_run('skip', 'spatial_pattern_classification') as check, check():
             plot_predictions(subject, trial, config, predictions, ins_index)
             count = count + 1
     plt.show()
+
+with skip_run('skip', 'plot_eeg_epochs') as check, check():
+    read_path = Path(__file__).parents[1] / config['clean_eeg_dataset']
+    data = dd.io.load(read_path, group='/7707/eeg/HighFine')
+    print(data.plot(block=True))

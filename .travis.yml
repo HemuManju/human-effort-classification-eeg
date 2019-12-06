@@ -1,0 +1,20 @@
+language: python
+python:
+  - '3.7'
+
+# Command to install dependencies
+install:
+  - pip install -r requirements.txt
+
+# Install the codecov pip dependency
+install:
+  - pip install codecov
+  - pip install pytest-cov
+
+# Command to run tests
+script:
+  - pytest --cov=./src/ tests/
+
+# Push the results back to codecov
+after_success:
+  - codecov

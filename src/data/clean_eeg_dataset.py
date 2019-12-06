@@ -1,8 +1,11 @@
+from pathlib import Path
+
+import mne
 import deepdish as dd
-from autoreject import get_rejection_threshold
-import yaml
+from autoreject import AutoReject, get_rejection_threshold
 import collections
-from .eeg_utils import *
+
+# from .eeg_utils import *
 
 
 def autoreject_repair_epochs(epochs, reject_plot=False):
@@ -61,7 +64,7 @@ def append_eog_index(epochs, ica):
                                              verbose=False)
     eog_inds.sort()
     # Append only when the correlation is high
-    id_eog = [i for i, n in enumerate(scores_eog.tolist()) if abs(n) >= 0.65]
+    id_eog = [i for i, n in enumerate(scores_eog.tolist()) if abs(n) >= 0.75]
     ica.exclude += id_eog
 
     return ica
@@ -103,8 +106,9 @@ def clean_with_ica(epochs, show_ica=False):
     return epochs, ica
 
 
-def clean_dataset(subjects, trials):
-    """Create cleaned dataset (by running autoreject and ICA) with each subject data in a dictionary.
+def clean_dataset(subjects, trials, config):
+    """Create cleaned dataset (by running autoreject and ICA)
+    with each subject data in a dictionary.
 
     Parameter
     ----------
