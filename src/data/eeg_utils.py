@@ -76,9 +76,8 @@ def get_eeg_time(subject):
     # EEG time
     eeg_path = get_eeg_path(subject)
     eeg_time = eeg_path.split('.')
-    eeg_time = datetime.strptime(''.join(eeg_time[1:3]) + '0000',
+    eeg_time = datetime.strptime(''.join(eeg_time[2:4]) + '0000',
                                  '%d%m%y%H%M%S%f')
-
     return eeg_time
 
 
@@ -202,9 +201,10 @@ def create_eeg_epochs(subject, trial, preload=True):
                         tmin=0,
                         tmax=config['epoch_length'],
                         verbose=False,
+                        baseline=(0, 0),
                         preload=preload)
 
-    return epochs
+    return epochs, raw_cropped
 
 
 def read_eeg_epochs(subject, trial):

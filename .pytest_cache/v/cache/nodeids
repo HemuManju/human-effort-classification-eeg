@@ -1,8 +1,0 @@
-[
-  "tests/test_data.py::test_eeg_dataset_length",
-  "tests/test_data.py::test_eeg_robot_dataset_length",
-  "tests/test_data.py::test_robot_dataset_length",
-  "tests/test_data.py::test_torch_dataset_length",
-  "tests/test_data.py::test_data_iterator_ids",
-  "tests/test_data.py::test_data_balance"
-]

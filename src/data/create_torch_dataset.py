@@ -1,10 +1,6 @@
 import deepdish as dd
-import torch
-import yaml
 from pathlib import Path
-import deepdish as dd
 import numpy as np
-import collections
 
 
 def one_hot_encode(label_length, category):
@@ -62,7 +58,7 @@ def convert_to_array(subject, trial, config):
     # In order to accomodate testing
     try:
         y_array = one_hot_encode(x.shape[0], category)
-    except:
+    except Exception:
         y_array = np.zeros((x.shape[0], 3))
 
     return x_array, y_array

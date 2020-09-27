@@ -42,7 +42,7 @@ trials: ['HighFine', 'HighGross', 'LowFine', 'LowGross']
 # Path
 raw_eeg_path: 'data/raw/experiment_0/eeg_data/'
 raw_robot_path: 'data/raw/experiment_0/force_data/'
-raw_eeg_dataset: 'data/interim/raw_eeg_exp_0_dataset.h5'
+raw_eeg_dataset: 'data/interim/raw_eeg_dataset.h5'
 clean_eeg_dataset: 'data/interim/clean_eeg_exp_0_dataset.h5'
 raw_robot_dataset: 'data/interim/raw_robot_exp_0_dataset.h5'
 torch_dataset: 'data/processed/torch_exp_0_dataset.h5'
